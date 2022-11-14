@@ -9,6 +9,7 @@ using FireSharp;
 using Netflix_backend.Models;
 using System.Net;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace Netflix_backend.Controllers
 {
@@ -30,10 +31,16 @@ namespace Netflix_backend.Controllers
 
 
             IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse resp = client.Get(@"Users/" + user.Username);
-            UserRegister user_ = resp.ResultAs<UserRegister>();
+            FirebaseResponse resp = client.Get(@"Users/" + user.Email);
+           
+            UserModel user_ = resp.ResultAs<UserModel>();
             if (user_ == null) {
-                SetResponse set = client.Set(@"Users/" + user.Username, user);
+                FirebaseResponse users_res = client.Get("Users");
+                Dictionary<string, UserModel> data = users_res.ResultAs<Dictionary<string, UserModel>>();
+                int count = data.Count + 1;
+                String id = count.ToString();
+                UserModel new_user = new UserModel(id, user.Name, user.Email, user.Password);
+                SetResponse set = client.Set(@"Users/" + new_user.Email, new_user);
                 int status = (int)set.StatusCode;
                 if (status == 200)
                 {
@@ -58,7 +65,7 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPost]
-        public JsonResult Login([FromBody] UserModel user) {
+        public JsonResult Login([FromBody] UserLogin user) {
             IFirebaseConfig ifc = new FirebaseConfig()
             {
                 AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
@@ -67,31 +74,150 @@ namespace Netflix_backend.Controllers
 
            
             IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + user.Username);
-            UserRegister user_ = res.ResultAs<UserRegister>();
+            FirebaseResponse res = client.Get(@"Users/" + user.Email);
+            UserModel user_ = res.ResultAs<UserModel>();
             if (user_.Password == user.Password) {
                 return Json(user_);
             }
-            return null;
+            return Json(null);
 
             
         }
 
-
-        // just a testing function, nothing to do no
-        public JsonResult New()
+        [HttpPut]
+        public JsonResult AddToFavorites([FromQuery] String email, String movie)
         {
-            //Console.WriteLine(id);
-            //string userid = UrlUtil.getParam(this, "userid", "");
-            //string pwd = UrlUtil.getParam(this, "pwd", "");
+            IFirebaseConfig ifc = new FirebaseConfig()
+            {
+                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+            };
 
-            //string resp = DynAggrClientAPI.openSession(userid, pwd);
-            //var jObject = JObject.Parse(resp);
 
-            //var response = Request.CreateResponse(HttpStatusCode.OK);
-            //response.Content = new StringContent(jObject.ToString(), Encoding.UTF8, "application/json");
-            //return response;
-            return Json("Ahmed Naeem is a pure genius!");
+            IFirebaseClient client = new FirebaseClient(ifc);
+            FirebaseResponse res = client.Get(@"Users/" + email);
+            UserModel user_ = res.ResultAs<UserModel>();
+            if (user_ != null) {
+                user_.Favlist.Add(movie);
+                res = client.Update<UserModel>(@"Users/" + email, user_);
+                Response response = new Response(200, "Movie successfully added to Favorites!");
+                return Json(response);
+            }
+            else
+            {
+                Response response = new Response(400, "User does not exist!");
+                return Json(response);
+            }
+
         }
+
+        [HttpPut]
+        public JsonResult RemoveFromFavorites([FromQuery] String email, String movie)
+        {
+            IFirebaseConfig ifc = new FirebaseConfig()
+            {
+                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+            };
+
+
+            IFirebaseClient client = new FirebaseClient(ifc);
+            FirebaseResponse res = client.Get(@"Users/" + email);
+            UserModel user_ = res.ResultAs<UserModel>();
+            if (user_ != null)
+            {
+                user_.Favlist.Remove(movie);
+                res = client.Update<UserModel>(@"Users/" + email, user_);
+                Response response = new Response(200, "Movie successfully removed from Favorites!");
+                return Json(response);
+            }
+            else
+            {
+                Response response = new Response(400, "User does not exist!");
+                return Json(response);
+            }
+        }
+
+        [HttpPut]
+        public JsonResult AddToHistory([FromQuery] String email, String movie)
+        {
+            IFirebaseConfig ifc = new FirebaseConfig()
+            {
+                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+            };
+
+
+            IFirebaseClient client = new FirebaseClient(ifc);
+            FirebaseResponse res = client.Get(@"Users/" + email);
+            UserModel user_ = res.ResultAs<UserModel>();
+            if (user_ != null)
+            {
+                user_.MovieHistroy.Add(movie);
+                res = client.Update<UserModel>(@"Users/" + email, user_);
+                Response response = new Response(200, "Movie successfully removed from Favorites!");
+                return Json(response);
+            }
+            else
+            {
+                Response response = new Response(400, "User does not exist!");
+                return Json(response);
+            }
+        }
+
+        [HttpPut]
+        public JsonResult RemoveFromHistory([FromQuery] String email, String movie)
+        {
+            IFirebaseConfig ifc = new FirebaseConfig()
+            {
+                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+            };
+
+
+            IFirebaseClient client = new FirebaseClient(ifc);
+            FirebaseResponse res = client.Get(@"Users/" + email);
+            UserModel user_ = res.ResultAs<UserModel>();
+            if (user_ != null)
+            {
+                user_.MovieHistroy.Remove(movie);
+                res = client.Update<UserModel>(@"Users/" + email, user_);
+                Response response = new Response(200, "Movie successfully removed from Favorites!");
+                return Json(response);
+            }
+            else
+            {
+                Response response = new Response(400, "User does not exist!");
+                return Json(response);
+            }
+        }
+
+        [HttpPut]
+        public JsonResult ClearHistory([FromQuery] String email, String movie)
+        {
+            IFirebaseConfig ifc = new FirebaseConfig()
+            {
+                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+            };
+
+
+            IFirebaseClient client = new FirebaseClient(ifc);
+            FirebaseResponse res = client.Get(@"Users/" + email);
+            UserModel user_ = res.ResultAs<UserModel>();
+            if (user_ != null)
+            {
+                user_.MovieHistroy.Clear();
+                res = client.Update<UserModel>(@"Users/" + email, user_);
+                Response response = new Response(200, "Movie successfully removed from Favorites!");
+                return Json(response);
+            }
+            else
+            {
+                Response response = new Response(400, "User does not exist!");
+                return Json(response);
+            }
+        }
+
     }
 }

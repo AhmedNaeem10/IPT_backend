@@ -2,7 +2,10 @@
   <MonoDevelop.Ide.ItemProperties.Netflix__backend PreferredExecutionTarget="/Applications/Google Chrome.app" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Netflix_backend/Controllers/UserController.cs">
     <Files>
-      <File FileName="Netflix_backend/Controllers/User.cs" Line="35" Column="68" />
+      <File FileName="Netflix_backend/Models/Movie.cs" Line="22" Column="31" />
+      <File FileName="Netflix_backend/Controllers/MovieController.cs" Line="123" Column="99" />
+      <File FileName="Netflix_backend/Controllers/UserController.cs" Line="99" Column="19" />
+      <File FileName="Netflix_backend/Models/UserModel.cs" Line="6" Column="18" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">

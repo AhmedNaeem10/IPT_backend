@@ -1,16 +1,16 @@
 ﻿using System;
 namespace Netflix_backend.Models
 {
-    public class UserModel
+    public class UserLogin
     {
-        public String Username { get; set; }
+        public String Email { get; set; }
         public String Password { get; set; }
 
-        public UserModel() { }
+        public UserLogin() { }
 
-        public UserModel(String username, String password)
+        public UserLogin(String email, String password)
         {
-            this.Username = username;
+            this.Email = email;
             this.Password = password;
         }
 
