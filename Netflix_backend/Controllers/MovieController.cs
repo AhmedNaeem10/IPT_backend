@@ -105,6 +105,42 @@ namespace Netflix_backend.Controllers
 
         }
 
+        [HttpPost]
+        public JsonResult Edit([FromBody] MovieModel movie) {
+            IFirebaseConfig ifc = new FirebaseConfig()
+            {
+                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+            };
+
+
+            IFirebaseClient client = new FirebaseClient(ifc);
+            FirebaseResponse resp = client.Get(@"Movies/" + movie.Title);
+            MovieModel movie_ = resp.ResultAs<MovieModel>();
+            if (movie_ != null) {
+                resp = client.Update<MovieModel>(@"Movies/" + movie.Title, movie);
+                int status = (int)resp.StatusCode;
+                if (status == 200)
+                {
+                    Response res = new Response(200, "Movie updated successfully!");
+                    return new JsonResult(res);
+                }
+                else
+                {
+                    Response res = new Response(400, "There was an error updating the movie!");
+                    return new JsonResult(res);
+                }
+            }
+            else
+            {
+                Response res = new Response(400, "No such movie exists!");
+                return new JsonResult(res);
+            }
+
+        }
+
+
+
 
         [HttpGet]
         public JsonResult Get() {

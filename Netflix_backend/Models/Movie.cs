@@ -27,6 +27,7 @@ namespace Netflix_backend.Models
 
         public MovieModel()
         {
+            this.MovieId = Guid.NewGuid().ToString("N");
         }
     }
 }
