@@ -30,20 +30,13 @@ namespace Netflix_backend.Controllers
             FirebaseResponse resp = client.Get("@Genres/" + genre);
             Genre data = resp.ResultAs<Genre>();
             if (data == null) {
-                FirebaseResponse response = client.Get("Genres");
-                Dictionary<string, Genre> all_genres = response.ResultAs<Dictionary<string, Genre>>();
-                if (all_genres == null) {
-                    Genre new_genre = new Genre("1", genre);
-                    response = client.Set(@"Genres/" + genre, new_genre);
-                    return;
-                }
-
-                int count = all_genres.Count;
-                int new_id = count + 1;
-                String id = new_id.ToString();
-                Genre new_genre_ = new Genre(id, genre);
-                response = client.Set(@"Genres/" + genre, new_genre_);
+                Genre new_genre_ = new Genre(genre);
+                FirebaseResponse response = client.Set(@"Genres/" + genre, new_genre_);
             }
+            else {
+                Console.WriteLine("Genre already exists");
+            }
+
             // else no need to add genre as it already exists
         }
 

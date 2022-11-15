@@ -69,9 +69,42 @@ namespace Netflix_backend.Controllers
                 Response res = new Response(400, "There was an error in the request!");
                 return new JsonResult(res);
             }
+        }
 
+        [HttpDelete]
+        public JsonResult Delete([FromQuery] String title) {
+            IFirebaseConfig ifc = new FirebaseConfig()
+            {
+                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+            };
+
+
+            IFirebaseClient client = new FirebaseClient(ifc);
+            FirebaseResponse resp = client.Get(@"Movies/" + title);
+            MovieModel movie = resp.ResultAs<MovieModel>();
+            if (movie != null) {
+                resp = client.Delete(@"Movies/" + title);
+                int status = (int)resp.StatusCode;
+                if (status == 200) {
+                    Response res = new Response(200, "Movie deleted successfully!");
+                    return new JsonResult(res);
+                }
+                else
+                {
+                    Response res = new Response(400, "There was an error deleting the movie!");
+                    return new JsonResult(res);
+                }
+
+            }
+            else
+            {
+                Response res = new Response(400, "No such movie exists!");
+                return new JsonResult(res);
+            }
 
         }
+
 
         [HttpGet]
         public JsonResult Get() {
@@ -87,9 +120,6 @@ namespace Netflix_backend.Controllers
             FirebaseResponse response = client.Get("Movies");
             Dictionary<string, MovieModel> data = response.ResultAs<Dictionary<string,  MovieModel>>();
             return new JsonResult(data);
-            //MovieModel movies = response.ResultAs<MovieModel>();
-            //return new JsonResult(movies);
-
         }
 
         [HttpGet]

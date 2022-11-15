@@ -10,6 +10,8 @@ using Netflix_backend.Models;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Netflix_backend.Controllers
 {
@@ -31,16 +33,11 @@ namespace Netflix_backend.Controllers
 
 
             IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse resp = client.Get(@"Users/" + user.Email);
-           
-            UserModel user_ = resp.ResultAs<UserModel>();
-            if (user_ == null) {
-                FirebaseResponse users_res = client.Get("Users");
-                Dictionary<string, UserModel> data = users_res.ResultAs<Dictionary<string, UserModel>>();
-                int count = data.Count + 1;
-                String id = count.ToString();
-                UserModel new_user = new UserModel(id, user.Name, user.Email, user.Password);
-                SetResponse set = client.Set(@"Users/" + new_user.Email, new_user);
+            UserLogin userlogin = new UserLogin(user.Email, user.Password);
+            var response = Login(userlogin);
+            if (response == null) {
+                UserModel new_user = new UserModel(user.Name, user.Email, user.Password);
+                SetResponse set = client.Set(@"Users/" + new_user.UserId, new_user);
                 int status = (int)set.StatusCode;
                 if (status == 200)
                 {
@@ -65,7 +62,7 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPost]
-        public JsonResult Login([FromBody] UserLogin user) {
+        public String Login([FromBody] UserLogin user) {
             IFirebaseConfig ifc = new FirebaseConfig()
             {
                 AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
@@ -74,18 +71,22 @@ namespace Netflix_backend.Controllers
 
            
             IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + user.Email);
-            UserModel user_ = res.ResultAs<UserModel>();
-            if (user_.Password == user.Password) {
-                return Json(user_);
+            FirebaseResponse res = client.Get("Users");
+            Dictionary<string, UserModel> data = res.ResultAs<Dictionary<string, UserModel>>();
+            foreach(KeyValuePair<string, UserModel> entry in data) {
+                if (entry.Value.Email == user.Email && entry.Value.Password == user.Password) {
+                    UserModel usermodel = entry.Value;
+                    return JsonConvert.SerializeObject(usermodel);
+                }
+
             }
-            return Json(null);
+            return "not";
 
             
         }
 
         [HttpPut]
-        public JsonResult AddToFavorites([FromQuery] String email, String movie)
+        public JsonResult AddToFavorites([FromQuery] String uid, String movie)
         {
             IFirebaseConfig ifc = new FirebaseConfig()
             {
@@ -95,11 +96,11 @@ namespace Netflix_backend.Controllers
 
 
             IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + email);
+            FirebaseResponse res = client.Get(@"Users/" + uid);
             UserModel user_ = res.ResultAs<UserModel>();
             if (user_ != null) {
                 user_.Favlist.Add(movie);
-                res = client.Update<UserModel>(@"Users/" + email, user_);
+                res = client.Update<UserModel>(@"Users/" + uid, user_);
                 Response response = new Response(200, "Movie successfully added to Favorites!");
                 return Json(response);
             }
@@ -112,7 +113,7 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPut]
-        public JsonResult RemoveFromFavorites([FromQuery] String email, String movie)
+        public JsonResult RemoveFromFavorites([FromQuery] String uid, String movie)
         {
             IFirebaseConfig ifc = new FirebaseConfig()
             {
@@ -122,12 +123,12 @@ namespace Netflix_backend.Controllers
 
 
             IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + email);
+            FirebaseResponse res = client.Get(@"Users/" + uid);
             UserModel user_ = res.ResultAs<UserModel>();
             if (user_ != null)
             {
                 user_.Favlist.Remove(movie);
-                res = client.Update<UserModel>(@"Users/" + email, user_);
+                res = client.Update<UserModel>(@"Users/" + uid, user_);
                 Response response = new Response(200, "Movie successfully removed from Favorites!");
                 return Json(response);
             }
@@ -139,7 +140,7 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPut]
-        public JsonResult AddToHistory([FromQuery] String email, String movie)
+        public JsonResult AddToHistory([FromQuery] String uid, String movie)
         {
             IFirebaseConfig ifc = new FirebaseConfig()
             {
@@ -149,12 +150,12 @@ namespace Netflix_backend.Controllers
 
 
             IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + email);
+            FirebaseResponse res = client.Get(@"Users/" + uid);
             UserModel user_ = res.ResultAs<UserModel>();
             if (user_ != null)
             {
                 user_.MovieHistroy.Add(movie);
-                res = client.Update<UserModel>(@"Users/" + email, user_);
+                res = client.Update<UserModel>(@"Users/" + uid, user_);
                 Response response = new Response(200, "Movie successfully removed from Favorites!");
                 return Json(response);
             }
@@ -166,7 +167,7 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPut]
-        public JsonResult RemoveFromHistory([FromQuery] String email, String movie)
+        public JsonResult RemoveFromHistory([FromQuery] String uid, String movie)
         {
             IFirebaseConfig ifc = new FirebaseConfig()
             {
@@ -176,12 +177,12 @@ namespace Netflix_backend.Controllers
 
 
             IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + email);
+            FirebaseResponse res = client.Get(@"Users/" + uid);
             UserModel user_ = res.ResultAs<UserModel>();
             if (user_ != null)
             {
                 user_.MovieHistroy.Remove(movie);
-                res = client.Update<UserModel>(@"Users/" + email, user_);
+                res = client.Update<UserModel>(@"Users/" + uid, user_);
                 Response response = new Response(200, "Movie successfully removed from Favorites!");
                 return Json(response);
             }

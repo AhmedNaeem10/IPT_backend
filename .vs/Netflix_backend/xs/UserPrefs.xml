@@ -1,21 +1,23 @@
 ﻿<Properties StartupConfiguration="{BE96BF16-4DC7-4AB1-B3C8-D8FB344D9B2A}|Default">
   <MonoDevelop.Ide.ItemProperties.Netflix__backend PreferredExecutionTarget="/Applications/Google Chrome.app" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Netflix_backend/Controllers/UserController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Netflix_backend/Models/Genre.cs">
     <Files>
       <File FileName="Netflix_backend/Models/Movie.cs" Line="22" Column="31" />
-      <File FileName="Netflix_backend/Controllers/MovieController.cs" Line="123" Column="99" />
-      <File FileName="Netflix_backend/Controllers/UserController.cs" Line="99" Column="19" />
-      <File FileName="Netflix_backend/Models/UserModel.cs" Line="6" Column="18" />
+      <File FileName="Netflix_backend/Controllers/MovieController.cs" Line="125" Column="68" />
+      <File FileName="Netflix_backend/Controllers/UserController.cs" Line="38" Column="21" />
+      <File FileName="Netflix_backend/Models/UserModel.cs" Line="25" Column="56" />
+      <File FileName="Netflix_backend/Controllers/GenreController.cs" Line="1" Column="1" />
+      <File FileName="Netflix_backend/Models/Genre.cs" Line="12" Column="25" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Netflix_backend" expanded="True">
             <Node name="Netflix_backend" expanded="True">
-              <Node name="Controllers" expanded="True">
-                <Node name="UserController.cs" selected="True" />
+              <Node name="Controllers" expanded="True" />
+              <Node name="Models" expanded="True">
+                <Node name="Genre.cs" selected="True" />
               </Node>
-              <Node name="Models" expanded="True" />
             </Node>
           </Node>
         </State>

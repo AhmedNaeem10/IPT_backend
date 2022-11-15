@@ -13,23 +13,24 @@ namespace Netflix_backend.Models
 
         public String Password { get; set; }
 
+        
         public List<String> Favlist;
 
         public List<String> MovieHistroy;
 
         public UserModel()
         {
+            this.Favlist = new List<String>();
+            this.MovieHistroy = new List<String>();
         }
 
-        public UserModel(String id, String name, String email, String password) {
-            this.UserId = id;
+        public UserModel(String name, String email, String password) {
+            this.UserId = Guid.NewGuid().ToString("N");
             this.Name = name;
             this.Email = email;
             this.Password = password;
             this.Favlist = new List<String>();
-            this.Favlist.Add("-1");
             this.MovieHistroy = new List<String>();
-            this.MovieHistroy.Add("-1");
         }
 
     }

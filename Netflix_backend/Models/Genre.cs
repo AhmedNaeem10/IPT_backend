@@ -8,8 +8,8 @@ namespace Netflix_backend.Models
         public Genre()
         {
         }
-        public Genre(String GenreId, String Name) {
-            this.GenreId = GenreId;
+        public Genre(String Name) {
+            this.GenreId = Guid.NewGuid().ToString("N");
             this.Name = Name;
         }
 
