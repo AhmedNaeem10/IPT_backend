@@ -38,6 +38,10 @@ namespace Netflix_backend.Controllers
                     BasePath = "https://fir-fast-36fe8.firebaseio.com/"
                 };
 
+                FirebaseAuth auth_ = new FirebaseAuth();
+
+                await auth.RefreshAuthAsync(auth_);
+
 
                 IFirebaseClient client = new FirebaseClient(ifc);
                 
@@ -88,10 +92,18 @@ namespace Netflix_backend.Controllers
                 // Verification.
                 if (ModelState.IsValid)
                 {
+                    
+
                     var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
+                    //FirebaseAuth auth_ = new FirebaseAuth();
+
+                    
+
                     var ab = await auth.SignInWithEmailAndPasswordAsync(user.Email, user.Password);
+                    await ab.RefreshUserDetails();
                     string token = ab.FirebaseToken;
                     var user_ = ab.User;
+                    
                     
                     if (token != "")
                     {
@@ -287,9 +299,7 @@ namespace Netflix_backend.Controllers
         [HttpGet]
         public async Task<JsonResult> ResetPassword([FromQuery] String email) {
             try
-            {
-                // Verification.
-                Console.WriteLine(email);
+            { 
                 if (ModelState.IsValid)
                 {
                     var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
@@ -299,7 +309,6 @@ namespace Netflix_backend.Controllers
             }
             catch (Exception ex)
             {
-                // Info
                 return Json("There was an error in the request!");
             }
             return Json("There was an error in the request!");
