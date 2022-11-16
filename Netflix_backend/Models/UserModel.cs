@@ -24,8 +24,8 @@ namespace Netflix_backend.Models
             this.MovieHistroy = new List<String>();
         }
 
-        public UserModel(String name, String email, String password) {
-            this.UserId = Guid.NewGuid().ToString("N");
+        public UserModel(String id, String name, String email, String password) {
+            this.UserId = id;
             this.Name = name;
             this.Email = email;
             this.Password = password;

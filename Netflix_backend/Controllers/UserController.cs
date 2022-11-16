@@ -38,14 +38,9 @@ namespace Netflix_backend.Controllers
                     BasePath = "https://fir-fast-36fe8.firebaseio.com/"
                 };
 
-                FirebaseAuth auth_ = new FirebaseAuth();
-
-                await auth.RefreshAuthAsync(auth_);
-
-
                 IFirebaseClient client = new FirebaseClient(ifc);
                 
-                UserModel new_user = new UserModel(user.Name, user.Email, user.Password);
+                UserModel new_user = new UserModel(a.User.LocalId, user.Name, user.Email, user.Password);
                 SetResponse set = client.Set(@"Users/" + new_user.UserId, new_user);
                 int status = (int)set.StatusCode;
                 if (status == 200)
@@ -314,5 +309,26 @@ namespace Netflix_backend.Controllers
             return Json("There was an error in the request!");
         }
 
+        [HttpPost]
+        public async Task<JsonResult> SendVerificationEmail([FromBody] UserLogin user)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
+                    var ab = await auth.SignInWithEmailAndPasswordAsync(user.Email, user.Password);
+                    await ab.RefreshUserDetails();
+                    string token = ab.FirebaseToken;
+                    await auth.SendEmailVerificationAsync(token);
+                    return Json("Email has been sent!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json("There was an error in the request!");
+            }
+            return Json("There was an error in the request!");
+        }
     }
 }
