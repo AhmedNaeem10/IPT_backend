@@ -1,41 +1,46 @@
 ﻿using System;
-using System.Net.Http;
-using FireSharp.Config;
 using FireSharp.Response;
 using FireSharp.Config;
 using Microsoft.AspNetCore.Mvc;
 using FireSharp.Interfaces;
 using FireSharp;
 using Netflix_backend.Models;
-using System.Net;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Firebase.Auth;
+using System.Security.Claims;
+using Microsoft.AspNet.Identity;
+using System.Web;
 
 namespace Netflix_backend.Controllers
 {
     public class User : Controller
     {
+        private static string ApiKey = "AIzaSyCPcdnvkK1SeroRhlgDkdA_EHPw4qHCluw";
+
         public User()
         {
 
         }
 
         [HttpPost]
-        public JsonResult Register([FromBody] UserRegister user)
+        public async Task<JsonResult> Register([FromBody] UserRegister user)
         {
-            IFirebaseConfig ifc = new FirebaseConfig()
+            try
             {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
+                var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
+
+                var a = await auth.CreateUserWithEmailAndPasswordAsync(user.Email, user.Password, user.Name, true);
+                IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
 
 
-            IFirebaseClient client = new FirebaseClient(ifc);
-            UserLogin userlogin = new UserLogin(user.Email, user.Password);
-            var response = Login(userlogin);
-            if (response == null) {
+                IFirebaseClient client = new FirebaseClient(ifc);
+                
                 UserModel new_user = new UserModel(user.Name, user.Email, user.Password);
                 SetResponse set = client.Set(@"Users/" + new_user.UserId, new_user);
                 int status = (int)set.StatusCode;
@@ -49,46 +54,73 @@ namespace Netflix_backend.Controllers
                     Response res = new Response(status, "Failed to register the user!");
                     return Json(res);
                 }
+
             }
-            else
+            catch (Exception ex)
             {
-                Response res = new Response(400, "User already exists!");
+                Response res = new Response(400, "User already exists or some other error!");
                 return Json(res);
             }
-
-            
-
-
         }
 
         [HttpPost]
-        public String Login([FromBody] UserLogin user) {
-            IFirebaseConfig ifc = new FirebaseConfig()
+        public async Task<JsonResult> Login([FromBody] UserLogin user) {
+            //IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+            //{
+            //    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+            //    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+            //};
+
+
+            //IFirebaseClient client = new FirebaseClient(ifc);
+            //FirebaseResponse res = client.Get("Users");
+            //Dictionary<string, UserModel> data = res.ResultAs<Dictionary<string, UserModel>>();
+            //foreach(KeyValuePair<string, UserModel> entry in data) {
+            //    if (entry.Value.Email == user.Email && entry.Value.Password == user.Password) {
+            //        UserModel usermodel = entry.Value;
+            //        return JsonConvert.SerializeObject(usermodel);
+            //    }
+
+            //}
+            //return "not";
+            try
             {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
+                // Verification.
+                if (ModelState.IsValid)
+                {
+                    var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
+                    var ab = await auth.SignInWithEmailAndPasswordAsync(user.Email, user.Password);
+                    string token = ab.FirebaseToken;
+                    var user_ = ab.User;
+                    
+                    if (token != "")
+                    {
 
-           
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get("Users");
-            Dictionary<string, UserModel> data = res.ResultAs<Dictionary<string, UserModel>>();
-            foreach(KeyValuePair<string, UserModel> entry in data) {
-                if (entry.Value.Email == user.Email && entry.Value.Password == user.Password) {
-                    UserModel usermodel = entry.Value;
-                    return JsonConvert.SerializeObject(usermodel);
+                        //this.SignInUser(user.Email, token, false);
+                        
+                        Console.WriteLine(user_.IsEmailVerified);
+                        return Json(user_);
+
+                    }
+                    else
+                    {
+                        // Setting.
+                        return Json("Invalid username or password!");
+                    }
                 }
-
             }
-            return "not";
-
-            
+            catch (Exception ex)
+            {
+                // Info
+                return Json("Invalid username or password!");
+            }
+            return Json("There was an error in the request!");
         }
 
         [HttpPut]
         public JsonResult AddToFavorites([FromQuery] String uid, String movie)
         {
-            IFirebaseConfig ifc = new FirebaseConfig()
+            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
             {
                 AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
                 BasePath = "https://fir-fast-36fe8.firebaseio.com/"
@@ -115,7 +147,7 @@ namespace Netflix_backend.Controllers
         [HttpPut]
         public JsonResult RemoveFromFavorites([FromQuery] String uid, String movie)
         {
-            IFirebaseConfig ifc = new FirebaseConfig()
+            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
             {
                 AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
                 BasePath = "https://fir-fast-36fe8.firebaseio.com/"
@@ -142,7 +174,7 @@ namespace Netflix_backend.Controllers
         [HttpPut]
         public JsonResult AddToHistory([FromQuery] String uid, String movie)
         {
-            IFirebaseConfig ifc = new FirebaseConfig()
+            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
             {
                 AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
                 BasePath = "https://fir-fast-36fe8.firebaseio.com/"
@@ -169,7 +201,7 @@ namespace Netflix_backend.Controllers
         [HttpPut]
         public JsonResult RemoveFromHistory([FromQuery] String uid, String movie)
         {
-            IFirebaseConfig ifc = new FirebaseConfig()
+            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
             {
                 AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
                 BasePath = "https://fir-fast-36fe8.firebaseio.com/"
@@ -196,7 +228,7 @@ namespace Netflix_backend.Controllers
         [HttpPut]
         public JsonResult ClearHistory([FromQuery] String email, String movie)
         {
-            IFirebaseConfig ifc = new FirebaseConfig()
+            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
             {
                 AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
                 BasePath = "https://fir-fast-36fe8.firebaseio.com/"
@@ -220,5 +252,36 @@ namespace Netflix_backend.Controllers
             }
         }
 
+
+        [HttpGet]
+        public String GetAll() {
+            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+            {
+                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+            };
+
+
+            IFirebaseClient client = new FirebaseClient(ifc);
+            FirebaseResponse res = client.Get("Users");
+            Dictionary<string, UserModel> data = res.ResultAs<Dictionary<string, UserModel>>();
+            return JsonConvert.SerializeObject(data.Values);
+        }
+
+        [HttpGet]
+        public String Get([FromQuery] String id)
+        {
+            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+            {
+                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+            };
+
+
+            IFirebaseClient client = new FirebaseClient(ifc);
+            FirebaseResponse res = client.Get(@"Users/" + id);
+            UserModel user = res.ResultAs<UserModel>();
+            return JsonConvert.SerializeObject(user);
+        }
     }
 }

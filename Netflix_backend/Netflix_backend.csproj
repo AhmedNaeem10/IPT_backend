@@ -6,8 +6,22 @@
 
   <ItemGroup>
     <None Remove="FireSharp" />
+    <None Remove="Microsoft.Owin" />
+    <None Remove="Microsoft.AspNet.Identity.Owin" />
+    <None Remove="Microsoft.Owin.Host.SystemWeb" />
+    <None Remove="Microsoft.Owin.Security.Cookies" />
+    <None Remove="Microsoft.Owin.Security" />
+    <None Remove="Firebase.Auth" />
+    <None Remove="Microsoft.AspNet.WebApi.Owin" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FireSharp" Version="2.0.4" />
+    <PackageReference Include="Microsoft.Owin" Version="4.2.2" />
+    <PackageReference Include="Microsoft.AspNet.Identity.Owin" Version="2.2.3" />
+    <PackageReference Include="Microsoft.Owin.Host.SystemWeb" Version="4.2.2" />
+    <PackageReference Include="Microsoft.Owin.Security.Cookies" Version="4.2.2" />
+    <PackageReference Include="Microsoft.Owin.Security" Version="4.2.2" />
+    <PackageReference Include="Firebase.Auth" Version="1.0.0" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Owin" Version="5.2.9" />
   </ItemGroup>
 </Project>
