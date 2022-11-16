@@ -283,5 +283,27 @@ namespace Netflix_backend.Controllers
             UserModel user = res.ResultAs<UserModel>();
             return JsonConvert.SerializeObject(user);
         }
+
+        [HttpGet]
+        public async Task<JsonResult> ResetPassword([FromQuery] String email) {
+            try
+            {
+                // Verification.
+                Console.WriteLine(email);
+                if (ModelState.IsValid)
+                {
+                    var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
+                    await auth.SendPasswordResetEmailAsync(email);
+                    return Json("Email has been sent!");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Info
+                return Json("There was an error in the request!");
+            }
+            return Json("There was an error in the request!");
+        }
+
     }
 }
