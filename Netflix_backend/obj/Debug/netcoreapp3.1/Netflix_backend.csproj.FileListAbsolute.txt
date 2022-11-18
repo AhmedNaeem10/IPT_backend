@@ -1,5 +1,6 @@
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/appsettings.Development.json
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/appsettings.json
+/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Netflix_backend.deps.json
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Netflix_backend.runtimeconfig.json
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Netflix_backend.runtimeconfig.dev.json

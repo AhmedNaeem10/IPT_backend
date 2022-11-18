@@ -235,7 +235,7 @@ namespace Netflix_backend.Controllers
             try {
                 FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
                     ProjectId = "fir-fast-36fe8",
                 });
 
