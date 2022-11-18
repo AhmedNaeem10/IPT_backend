@@ -12,6 +12,10 @@ using Firebase.Auth;
 using System.Security.Claims;
 using Microsoft.AspNet.Identity;
 using System.Web;
+using Newtonsoft.Json.Linq;
+using FirebaseAdmin.Auth;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 namespace Netflix_backend.Controllers
 {
@@ -30,7 +34,7 @@ namespace Netflix_backend.Controllers
             try
             {
                 var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
-
+                
                 var a = await auth.CreateUserWithEmailAndPasswordAsync(user.Email, user.Password, user.Name, true);
                 IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
                 {
@@ -64,237 +68,327 @@ namespace Netflix_backend.Controllers
 
         [HttpPost]
         public async Task<JsonResult> Login([FromBody] UserLogin user) {
-            //IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
-            //{
-            //    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-            //    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            //};
-
-
-            //IFirebaseClient client = new FirebaseClient(ifc);
-            //FirebaseResponse res = client.Get("Users");
-            //Dictionary<string, UserModel> data = res.ResultAs<Dictionary<string, UserModel>>();
-            //foreach(KeyValuePair<string, UserModel> entry in data) {
-            //    if (entry.Value.Email == user.Email && entry.Value.Password == user.Password) {
-            //        UserModel usermodel = entry.Value;
-            //        return JsonConvert.SerializeObject(usermodel);
-            //    }
-
-            //}
-            //return "not";
             try
             {
                 // Verification.
                 if (ModelState.IsValid)
                 {
-                    
+
 
                     var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
-                    //FirebaseAuth auth_ = new FirebaseAuth();
-
-                    
-
                     var ab = await auth.SignInWithEmailAndPasswordAsync(user.Email, user.Password);
                     await ab.RefreshUserDetails();
-                    string token = ab.FirebaseToken;
+                    
+                    string token_ = ab.FirebaseToken;
+                    
                     var user_ = ab.User;
-                    
-                    
-                    if (token != "")
-                    {
 
-                        //this.SignInUser(user.Email, token, false);
-                        
-                        Console.WriteLine(user_.IsEmailVerified);
-                        return Json(user_);
+                    if (token_ != "")
+                    {
+                        UserLoginResponse userLoginResponse = new UserLoginResponse(user_.LocalId, token_, user_.IsEmailVerified);
+                        return Json(userLoginResponse);
 
                     }
                     else
                     {
-                        // Setting.
                         return Json("Invalid username or password!");
                     }
                 }
             }
             catch (Exception ex)
             {
-                // Info
                 return Json("Invalid username or password!");
             }
             return Json("There was an error in the request!");
         }
 
         [HttpPut]
-        public JsonResult AddToFavorites([FromQuery] String uid, String movie)
+        public async Task<JsonResult> AddToFavorites([FromQuery] String uid, String movie, [FromHeader] String token)
         {
-            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
+            try {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
+
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+              
+                IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
 
 
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + uid);
-            UserModel user_ = res.ResultAs<UserModel>();
-            if (user_ != null) {
-                user_.Favlist.Add(movie);
-                res = client.Update<UserModel>(@"Users/" + uid, user_);
-                Response response = new Response(200, "Movie successfully added to Favorites!");
+                IFirebaseClient client = new FirebaseClient(ifc);
+                FirebaseResponse res = client.Get(@"Users/" + uid);
+                UserModel user_ = res.ResultAs<UserModel>();
+                if (user_ != null)
+                {
+                    user_.Favlist.Add(movie);
+                    res = client.Update<UserModel>(@"Users/" + uid, user_);
+                    Response response = new Response(200, "Movie successfully added to Favorites!");
+                    return Json(response);
+                }
+                else
+                {
+                    Response response = new Response(400, "User does not exist!");
+                    return Json(response);
+                }
+            } catch (Exception ex) {
+                Response response = new Response(400, "There was an error in the request!");
                 return Json(response);
             }
-            else
-            {
-                Response response = new Response(400, "User does not exist!");
-                return Json(response);
-            }
+
+            
 
         }
 
         [HttpPut]
-        public JsonResult RemoveFromFavorites([FromQuery] String uid, String movie)
+        public async Task<JsonResult> RemoveFromFavorites([FromQuery] String uid, String movie, [FromHeader] String token)
         {
-            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
-
-
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + uid);
-            UserModel user_ = res.ResultAs<UserModel>();
-            if (user_ != null)
-            {
-                user_.Favlist.Remove(movie);
-                res = client.Update<UserModel>(@"Users/" + uid, user_);
-                Response response = new Response(200, "Movie successfully removed from Favorites!");
-                return Json(response);
-            }
-            else
-            {
-                Response response = new Response(400, "User does not exist!");
-                return Json(response);
-            }
-        }
-
-        [HttpPut]
-        public JsonResult AddToHistory([FromQuery] String uid, String movie)
-        {
-            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
-
-
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + uid);
-            UserModel user_ = res.ResultAs<UserModel>();
-            if (user_ != null)
-            {
-                user_.MovieHistroy.Add(movie);
-                res = client.Update<UserModel>(@"Users/" + uid, user_);
-                Response response = new Response(200, "Movie successfully removed from Favorites!");
-                return Json(response);
-            }
-            else
-            {
-                Response response = new Response(400, "User does not exist!");
-                return Json(response);
-            }
-        }
-
-        [HttpPut]
-        public JsonResult RemoveFromHistory([FromQuery] String uid, String movie)
-        {
-            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
-
-
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + uid);
-            UserModel user_ = res.ResultAs<UserModel>();
-            if (user_ != null)
-            {
-                user_.MovieHistroy.Remove(movie);
-                res = client.Update<UserModel>(@"Users/" + uid, user_);
-                Response response = new Response(200, "Movie successfully removed from Favorites!");
-                return Json(response);
-            }
-            else
-            {
-                Response response = new Response(400, "User does not exist!");
-                return Json(response);
-            }
-        }
-
-        [HttpPut]
-        public JsonResult ClearHistory([FromQuery] String email, String movie)
-        {
-            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
-
-
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + email);
-            UserModel user_ = res.ResultAs<UserModel>();
-            if (user_ != null)
-            {
-                user_.MovieHistroy.Clear();
-                res = client.Update<UserModel>(@"Users/" + email, user_);
-                Response response = new Response(200, "Movie successfully removed from Favorites!");
-                return Json(response);
-            }
-            else
-            {
-                Response response = new Response(400, "User does not exist!");
-                return Json(response);
-            }
-        }
-
-
-        [HttpGet]
-        public String GetAll() {
-            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
-
-
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get("Users");
-            Dictionary<string, UserModel> data = res.ResultAs<Dictionary<string, UserModel>>();
-            return JsonConvert.SerializeObject(data.Values);
-        }
-
-        [HttpGet]
-        public String Get([FromQuery] String id)
-        {
-            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
-
-
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse res = client.Get(@"Users/" + id);
-            UserModel user = res.ResultAs<UserModel>();
-            return JsonConvert.SerializeObject(user);
-        }
-
-        [HttpGet]
-        public async Task<JsonResult> ResetPassword([FromQuery] String email) {
             try
-            { 
+            {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
+
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+
+                IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
+
+
+                IFirebaseClient client = new FirebaseClient(ifc);
+                FirebaseResponse res = client.Get(@"Users/" + uid);
+                UserModel user_ = res.ResultAs<UserModel>();
+                if (user_ != null)
+                {
+                    user_.Favlist.Remove(movie);
+                    res = client.Update<UserModel>(@"Users/" + uid, user_);
+                    Response response = new Response(200, "Movie successfully removed from Favorites!");
+                    return Json(response);
+                }
+                else
+                {
+                    Response response = new Response(400, "User does not exist!");
+                    return Json(response);
+                }
+            }
+            catch (Exception ex) {
+                Response response = new Response(400, "There was an error in the request!");
+                return Json(response);
+            }
+        }
+
+        [HttpPut]
+        public async Task<JsonResult> AddToHistory([FromQuery] String uid, String movie, [FromHeader] String token)
+        {
+            try
+            {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
+
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+
+                IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
+
+
+                IFirebaseClient client = new FirebaseClient(ifc);
+                FirebaseResponse res = client.Get(@"Users/" + uid);
+                UserModel user_ = res.ResultAs<UserModel>();
+                if (user_ != null)
+                {
+                    user_.MovieHistroy.Add(movie);
+                    res = client.Update<UserModel>(@"Users/" + uid, user_);
+                    Response response = new Response(200, "Movie successfully removed from Favorites!");
+                    return Json(response);
+                }
+                else
+                {
+                    Response response = new Response(400, "User does not exist!");
+                    return Json(response);
+                }
+            }
+            catch (Exception ex) {
+                Response response = new Response(400, "There was an error in the request!");
+                return Json(response);
+            }
+        }
+
+        [HttpPut]
+        public async Task<JsonResult> RemoveFromHistory([FromQuery] String uid, String movie, [FromHeader] String token)
+        {
+            try {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
+
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+
+                IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
+
+
+                IFirebaseClient client = new FirebaseClient(ifc);
+                FirebaseResponse res = client.Get(@"Users/" + uid);
+                UserModel user_ = res.ResultAs<UserModel>();
+                if (user_ != null)
+                {
+                    user_.MovieHistroy.Remove(movie);
+                    res = client.Update<UserModel>(@"Users/" + uid, user_);
+                    Response response = new Response(200, "Movie successfully removed from Favorites!");
+                    return Json(response);
+                }
+                else
+                {
+                    Response response = new Response(400, "User does not exist!");
+                    return Json(response);
+                }
+            }
+            catch (Exception ex) {
+                Response response = new Response(400, "There was an error in the request!");
+                return Json(response);
+            }
+
+            
+        }
+
+        [HttpPut]
+        public async Task<JsonResult> ClearHistory([FromQuery] String email, String movie, [FromHeader] String token)
+        {
+            try {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
+
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+                string uid = decodedToken.Uid;
+
+                IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
+
+
+                IFirebaseClient client = new FirebaseClient(ifc);
+                FirebaseResponse res = client.Get(@"Users/" + email);
+                UserModel user_ = res.ResultAs<UserModel>();
+                if (user_ != null)
+                {
+                    user_.MovieHistroy.Clear();
+                    res = client.Update<UserModel>(@"Users/" + email, user_);
+                    Response response = new Response(200, "Movie successfully removed from Favorites!");
+                    return Json(response);
+                }
+                else
+                {
+                    Response response = new Response(400, "User does not exist!");
+                    return Json(response);
+                }
+            }
+            catch (Exception ex) {
+                Response response = new Response(400, "There was an error in the request!");
+                return Json(response);
+            }
+        }
+
+
+        [HttpGet]
+        public async Task<String> GetAll([FromHeader] String token) {
+            try {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
+
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+                string uid = decodedToken.Uid;
+                IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
+
+
+                IFirebaseClient client = new FirebaseClient(ifc);
+                FirebaseResponse res = client.Get("Users");
+                Dictionary<string, UserModel> data = res.ResultAs<Dictionary<string, UserModel>>();
+                return JsonConvert.SerializeObject(data.Values);
+            }
+            catch (Exception ex) {
+                Response response = new Response(400, "There was an error in the request!");
+                return JsonConvert.SerializeObject(response);
+            }
+
+            
+        }
+
+        [HttpGet]
+        public async Task<String> Get([FromQuery] String id, [FromHeader] String token)
+        {
+            try {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
+
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+                string uid = decodedToken.Uid;
+
+                IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
+
+
+                IFirebaseClient client = new FirebaseClient(ifc);
+                FirebaseResponse res = client.Get(@"Users/" + id);
+                UserModel user = res.ResultAs<UserModel>();
+                return JsonConvert.SerializeObject(user);
+            }
+            catch(Exception ex) {
+                Response res = new Response(400, "There was an error in the request");
+                return JsonConvert.SerializeObject(res);
+            }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ResetPassword([FromQuery] String email, [FromHeader] String token) {
+            try
+            {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
+
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+                string uid = decodedToken.Uid;
                 if (ModelState.IsValid)
                 {
                     var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
@@ -310,7 +404,7 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> SendVerificationEmail([FromBody] UserLogin user)
+        public async Task<JsonResult> SendVerificationEmail([FromBody] UserLogin user, [FromHeader] String token)
         {
             try
             {
@@ -319,8 +413,8 @@ namespace Netflix_backend.Controllers
                     var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
                     var ab = await auth.SignInWithEmailAndPasswordAsync(user.Email, user.Password);
                     await ab.RefreshUserDetails();
-                    string token = ab.FirebaseToken;
-                    await auth.SendEmailVerificationAsync(token);
+                    string token_ = ab.FirebaseToken;
+                    await auth.SendEmailVerificationAsync(token_);
                     return Json("Email has been sent!");
                 }
             }

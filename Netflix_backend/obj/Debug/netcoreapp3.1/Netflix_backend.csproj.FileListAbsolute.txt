@@ -8,7 +8,14 @@
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Netflix_backend.Views.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Netflix_backend.Views.pdb
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Firebase.Auth.dll
+/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/FirebaseAdmin.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/FireSharp.dll
+/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Google.Api.Gax.dll
+/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Google.Api.Gax.Rest.dll
+/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Google.Apis.dll
+/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Google.Apis.Auth.PlatformServices.dll
+/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Google.Apis.Auth.dll
+/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Google.Apis.Core.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Microsoft.AspNet.Identity.Core.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Microsoft.AspNet.Identity.Owin.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/System.Net.Http.Formatting.dll
@@ -17,6 +24,7 @@
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Microsoft.Threading.Tasks.Extensions.Desktop.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Microsoft.Threading.Tasks.Extensions.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Microsoft.Threading.Tasks.dll
+/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Microsoft.Bcl.AsyncInterfaces.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/System.Net.Http.Extensions.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/System.Net.Http.Primitives.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/System.ServiceModel.dll
@@ -28,6 +36,7 @@
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Newtonsoft.Json.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Newtonsoft.Json.Bson.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/Owin.dll
+/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/bin/Debug/netcoreapp3.1/System.Collections.Immutable.dll
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/obj/Debug/netcoreapp3.1/Netflix_backend.GeneratedMSBuildEditorConfig.editorconfig
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/obj/Debug/netcoreapp3.1/Netflix_backend.AssemblyInfoInputs.cache
 /Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/obj/Debug/netcoreapp3.1/Netflix_backend.AssemblyInfo.cs

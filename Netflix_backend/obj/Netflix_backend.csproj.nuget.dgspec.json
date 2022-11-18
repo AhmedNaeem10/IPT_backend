@@ -46,6 +46,10 @@
               "target": "Package",
               "version": "[1.0.0, )"
             },
+            "FirebaseAdmin": {
+              "target": "Package",
+              "version": "[2.3.0, )"
+            },
             "Microsoft.AspNet.Identity.Owin": {
               "target": "Package",
               "version": "[2.2.3, )"

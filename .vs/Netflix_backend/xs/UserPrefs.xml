@@ -1,18 +1,19 @@
 ﻿<Properties StartupConfiguration="{BE96BF16-4DC7-4AB1-B3C8-D8FB344D9B2A}|Default">
   <MonoDevelop.Ide.ItemProperties.Netflix__backend PreferredExecutionTarget="/Applications/Google Chrome.app" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Netflix_backend/Controllers/UserController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Netflix_backend/Models/UserLogin.cs">
     <Files>
-      <File FileName="Netflix_backend/Controllers/UserController.cs" Line="43" Column="51" />
+      <File FileName="Netflix_backend/Controllers/UserController.cs" Line="105" Column="1" />
+      <File FileName="Netflix_backend/Models/UserLogin.cs" Line="11" Column="10" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Netflix_backend" expanded="True">
             <Node name="Netflix_backend" expanded="True">
-              <Node name="Controllers" expanded="True">
-                <Node name="UserController.cs" selected="True" />
+              <Node name="Controllers" expanded="True" />
+              <Node name="Models" expanded="True">
+                <Node name="UserLogin.cs" selected="True" />
               </Node>
-              <Node name="Models" expanded="True" />
             </Node>
           </Node>
         </State>
