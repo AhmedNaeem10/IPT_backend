@@ -103,9 +103,10 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPut]
-        public async Task<JsonResult> AddToFavorites([FromQuery] String uid, String movie, [FromHeader] String token)
+        public async Task<JsonResult> AddToFavorites([FromQuery] String uid, String movie, [FromHeader] String Authorization)
         {
             try {
+                String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
                     Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
@@ -146,10 +147,11 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPut]
-        public async Task<JsonResult> RemoveFromFavorites([FromQuery] String uid, String movie, [FromHeader] String token)
+        public async Task<JsonResult> RemoveFromFavorites([FromQuery] String uid, String movie, [FromHeader] String Authorization)
         {
             try
             {
+                String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
                     Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
@@ -188,10 +190,11 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPut]
-        public async Task<JsonResult> AddToHistory([FromQuery] String uid, String movie, [FromHeader] String token)
+        public async Task<JsonResult> AddToHistory([FromQuery] String uid, String movie, [FromHeader] String Authorization)
         {
             try
             {
+                String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
                     Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
@@ -230,9 +233,10 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPut]
-        public async Task<JsonResult> RemoveFromHistory([FromQuery] String uid, String movie, [FromHeader] String token)
+        public async Task<JsonResult> RemoveFromHistory([FromQuery] String uid, String movie, [FromHeader] String Authorization)
         {
             try {
+                String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
                     Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
@@ -273,9 +277,10 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPut]
-        public async Task<JsonResult> ClearHistory([FromQuery] String email, String movie, [FromHeader] String token)
+        public async Task<JsonResult> ClearHistory([FromQuery] String email, String movie, [FromHeader] String Authorization)
         {
             try {
+                String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
                     Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
@@ -316,8 +321,9 @@ namespace Netflix_backend.Controllers
 
 
         [HttpGet]
-        public async Task<String> GetAll([FromHeader] String token) {
+        public async Task<String> GetAll([FromHeader] String Authorization) { 
             try {
+                String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
                     Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
@@ -347,9 +353,10 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpGet]
-        public async Task<String> Get([FromQuery] String id, [FromHeader] String token)
+        public async Task<String> Get([FromQuery] String id, [FromHeader] String Authorization)
         {
             try {
+                String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
                     Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
@@ -378,9 +385,10 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> ResetPassword([FromQuery] String email, [FromHeader] String token) {
+        public async Task<JsonResult> ResetPassword([FromQuery] String email, [FromHeader] String Authorization) {
             try
             {
+                String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
                     Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
@@ -404,10 +412,11 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> SendVerificationEmail([FromBody] UserLogin user, [FromHeader] String token)
+        public async Task<JsonResult> SendVerificationEmail([FromBody] UserLogin user, [FromHeader] String Authorization)
         {
             try
             {
+                String token = Authorization.Split(" ")[1];
                 if (ModelState.IsValid)
                 {
                     var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));

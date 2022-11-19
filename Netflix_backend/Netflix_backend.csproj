@@ -14,6 +14,7 @@
     <None Remove="Firebase.Auth" />
     <None Remove="Microsoft.AspNet.WebApi.Owin" />
     <None Remove="FirebaseAdmin" />
+    <None Remove="Microsoft.AspNetCore.Cors" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FireSharp" Version="2.0.4" />
@@ -25,5 +26,6 @@
     <PackageReference Include="Firebase.Auth" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Owin" Version="5.2.9" />
     <PackageReference Include="FirebaseAdmin" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
   </ItemGroup>
 </Project>
