@@ -1,21 +1,21 @@
 ﻿<Properties StartupConfiguration="{BE96BF16-4DC7-4AB1-B3C8-D8FB344D9B2A}|Default">
   <MonoDevelop.Ide.ItemProperties.Netflix__backend PreferredExecutionTarget="/Applications/Google Chrome.app" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Netflix_backend/Controllers/MovieController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Netflix_backend/Models/AnalyticsDetail.cs">
     <Files>
-      <File FileName="Netflix_backend/Controllers/UserController.cs" Line="463" Column="70" />
-      <File FileName="Netflix_backend/Controllers/AdminController.cs" Line="74" Column="77" />
-      <File FileName="Netflix_backend/Models/Movie.cs" Line="23" Column="1" />
-      <File FileName="Netflix_backend/Controllers/MovieController.cs" Line="207" Column="14" />
+      <File FileName="Netflix_backend/Models/Analytic.cs" Line="22" Column="35" />
+      <File FileName="Netflix_backend/Controllers/AnalyticController.cs" Line="26" Column="65" />
+      <File FileName="Netflix_backend/Controllers/MovieController.cs" Line="217" Column="77" />
+      <File FileName="Netflix_backend/Models/AnalyticsDetail.cs" Line="23" Column="24" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Netflix_backend" expanded="True">
             <Node name="Netflix_backend" expanded="True">
-              <Node name="Controllers" expanded="True">
-                <Node name="MovieController.cs" selected="True" />
+              <Node name="Controllers" expanded="True" />
+              <Node name="Models" expanded="True">
+                <Node name="AnalyticsDetail.cs" selected="True" />
               </Node>
-              <Node name="Models" expanded="True" />
             </Node>
           </Node>
         </State>

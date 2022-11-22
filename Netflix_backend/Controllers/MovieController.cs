@@ -161,47 +161,64 @@ namespace Netflix_backend.Controllers
         [HttpGet]
         public JsonResult GetByName([FromQuery] String name)
         {
-            IFirebaseConfig ifc = new FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
+            try {
+                IFirebaseConfig ifc = new FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
 
 
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse resp = client.Get(@"Movies/" + name);
-            MovieModel movie = resp.ResultAs<MovieModel>();
-            return new JsonResult(movie);
+                IFirebaseClient client = new FirebaseClient(ifc);
+                FirebaseResponse resp = client.Get(@"Movies/" + name);
+                MovieModel movie = resp.ResultAs<MovieModel>();
+                return new JsonResult(movie);
+            }
+            catch(Exception ex) {
+                Response res = new Response(400, "Failed to fetch the movie!");
+                return new JsonResult(res);
+            }
         }
 
         [HttpGet]
         public JsonResult GetByGenre([FromQuery] String genre)  // single genre
         {
-            IFirebaseConfig ifc = new FirebaseConfig()
+            try
             {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
+                IFirebaseConfig ifc = new FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
 
 
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse resp = client.Get("Movies");
-            Dictionary<string, MovieModel> data = resp.ResultAs<Dictionary<string, MovieModel>>();
-            List<MovieModel> movies = new List<MovieModel>();
-            foreach (KeyValuePair<string, MovieModel> entry in data)
-            {
-                MovieModel value = entry.Value;
-                String[] genres = value.Genres;
-                for (int i = 0; i < genres.Length; i++) {
-                    if (genres[i] == genre) {
-                        movies.Add(value);
+                IFirebaseClient client = new FirebaseClient(ifc);
+                FirebaseResponse resp = client.Get("Movies");
+                Dictionary<string, MovieModel> data = resp.ResultAs<Dictionary<string, MovieModel>>();
+                List<MovieModel> movies = new List<MovieModel>();
+                foreach (KeyValuePair<string, MovieModel> entry in data)
+                {
+                    MovieModel value = entry.Value;
+                    String[] genres = value.Genres;
+                    for (int i = 0; i < genres.Length; i++)
+                    {
+                        if (genres[i] == genre)
+                        {
+                            movies.Add(value);
+                        }
+
                     }
 
                 }
 
+                return new JsonResult(movies);
+            }
+            catch(Exception ex) {
+                Response res = new Response(400, "Failed to fetch the movies!");
+                return new JsonResult(res);
             }
 
-            return new JsonResult(movies);
+            
         }
 
         [HttpPut]
