@@ -1,25 +1,27 @@
 {
   "format": 1,
   "restore": {
-    "/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/Netflix_backend.csproj": {}
+    "D:\\FAST\\Semester7\\IPT\\Clone1\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj": {}
   },
   "projects": {
-    "/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/Netflix_backend.csproj": {
+    "D:\\FAST\\Semester7\\IPT\\Clone1\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/Netflix_backend.csproj",
+        "projectUniqueName": "D:\\FAST\\Semester7\\IPT\\Clone1\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj",
         "projectName": "Netflix_backend",
-        "projectPath": "/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/Netflix_backend.csproj",
-        "packagesPath": "/Users/ahmednaeem/.nuget/packages/",
-        "outputPath": "/Users/ahmednaeem/Projects/Netflix_backend/Netflix_backend/obj/",
+        "projectPath": "D:\\FAST\\Semester7\\IPT\\Clone1\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj",
+        "packagesPath": "C:\\Users\\Ahmad\\.nuget\\packages\\",
+        "outputPath": "D:\\FAST\\Semester7\\IPT\\Clone1\\IPT_backend\\Netflix_backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/ahmednaeem/.config/NuGet/NuGet.Config"
+          "C:\\Users\\Ahmad\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp3.1"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -49,6 +51,14 @@
             "FirebaseAdmin": {
               "target": "Package",
               "version": "[2.3.0, )"
+            },
+            "FirebaseDatabase.net": {
+              "target": "Package",
+              "version": "[4.1.0, )"
+            },
+            "FirebaseStorage.net": {
+              "target": "Package",
+              "version": "[1.0.3, )"
             },
             "Microsoft.AspNet.Identity.Owin": {
               "target": "Package",
@@ -97,7 +107,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/x64/sdk/6.0.101/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.414\\RuntimeIdentifierGraph.json"
         }
       }
     }

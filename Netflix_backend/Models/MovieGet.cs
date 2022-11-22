@@ -1,18 +1,19 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Netflix_backend.Models
 {
-    public class MovieModel
+    public class MovieGet
     {
-        public string MovieId { get; set; } = Guid.NewGuid().ToString("N");
+        public string MovieId { get; set; }
 
-        public IFormFile TrailerFile { get; set; }
+        public string TrailerUrl { get; set; }
 
-        public IFormFile ThumbnailFile { get; set; }
+        public string ThumbnailUrl { get; set; }
 
-        public IFormFile PosterFile { get; set; }
+        public string PosterUrl { get; set; }
 
         public string Title { get; set; }
 
@@ -25,14 +26,11 @@ namespace Netflix_backend.Models
         public string Year { get; set; }
 
         public List<string> Genres { get; set; } = new List<string>();
+
         public string Duration { get; set; }
 
         public float Rating { get; set; }
 
-        public void updateRating(float new_rating) {
-            this.Rating += new_rating;
-            this.Rating /= 2;
-        }
-
+        public DateTime createdOn { get; set; } = DateTime.UtcNow;
     }
 }

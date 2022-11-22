@@ -2,7 +2,6 @@
 using System.Net.Http;
 using FireSharp.Config;
 using FireSharp.Response;
-using FireSharp.Config;
 using Microsoft.AspNetCore.Mvc;
 using FireSharp.Interfaces;
 using FireSharp;
@@ -11,216 +10,394 @@ using System.Net;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Netflix_backend.Data;
+using System.Linq;
 
 namespace Netflix_backend.Controllers
 {
+
     public class MovieController
     {
-        public MovieController()
+        private readonly IConfiguration configuration;
+        private readonly Firebase.Database.FirebaseClient client;
+        private readonly IFirebaseClient client1;
+        private readonly string FireBaseDataBaseUrl;
+        private readonly string ApiKey;
+        private readonly string Bucket;
+        private readonly string AuthEmail;
+        private readonly string AuthPassword;
+
+        public MovieController(IConfiguration config)
         {
+            configuration = config;
+
+            IFirebaseConfig conn = new FirebaseConfig
+            {
+                AuthSecret = configuration.GetConnectionString("DataBaseSecret"),
+                BasePath = configuration.GetConnectionString("DataBaseAuth")
+            };
+            FireBaseDataBaseUrl = configuration.GetConnectionString("DataBaseAuth");
+            client1 = new FireSharp.FirebaseClient(conn);
+            client = new Firebase.Database.FirebaseClient(FireBaseDataBaseUrl);
+            ApiKey = configuration.GetConnectionString("WEBAPIKEY");
+            Bucket = configuration.GetConnectionString("Bucket");
+            AuthEmail = configuration.GetConnectionString("AuthEmail");
+            AuthPassword = configuration.GetConnectionString("AuthPassword");
         }
 
         [HttpPost]
-        public JsonResult Add([FromBody] MovieModel movie)
+        public async Task<IActionResult> addMovie([FromForm] MovieModel movie)
         {
-            IFirebaseConfig ifc = new FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
 
-
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse resp = client.Get(@"Movies/" + movie.Title);
-            if (resp != null)
+            MovieGet movieGet = new MovieGet();
+            try
             {
-
-                MovieModel movie_ = resp.ResultAs<MovieModel>();
-                if (movie_ == null)
-            {
-                SetResponse set = client.Set(@"Movies/" + movie.Title, movie);
-                int status = (int)set.StatusCode;
-                if (status == 200)
+                FileUploader fileupload = new FileUploader();
+                if (movie.TrailerFile.Length > 0)
                 {
-                    // now adding new genres if needed
-                    String[] genres = movie.Genres;
-                    for (int i = 0; i < genres.Length; i++) {
-                        string genre = genres[i];
-                        GenreController.Add(genre);
-                    }
 
-                    Response res = new Response(status, "Movie successfully added!");
-                    return new JsonResult(res);
+                    movieGet.TrailerUrl = await fileupload.FileUpload(movie.TrailerFile, ApiKey, AuthEmail, AuthPassword, Bucket);
                 }
                 else
                 {
-                    Response res = new Response(status, "Failed to add the movie!");
-                    return new JsonResult(res);
+                    return new OkObjectResult(new { status = false, msg = "Movie Video is required" });
                 }
+                if (movie.PosterFile.Length > 0)
+                {
+                    movieGet.PosterUrl = await fileupload.FileUpload(movie.PosterFile, ApiKey, AuthEmail, AuthPassword, Bucket);
+                }
+                else
+                {
+                    return new OkObjectResult(new { status = false, msg = "Movie Poster is required" });
+                }
+                if (movie.ThumbnailFile.Length > 0)
+                {
+                    movieGet.ThumbnailUrl = await fileupload.FileUpload(movie.ThumbnailFile, ApiKey, AuthEmail, AuthPassword, Bucket);
+                }
+                else
+                {
+                    return new OkObjectResult(new { status = false, msg = "Movie Thumbail  is required" });
+                }
+
+                var allMovies = await client.Child("Movies").OnceAsync<MovieGet>();
+                foreach (var a in allMovies)
+                {
+                    if (a.Object.Title == movie.Title)
+                    {
+                        return new OkObjectResult(new { status = false, msg = "Movie already exists with given name!" });
+                    }
+                }
+
+                movieGet.MovieId = movie.MovieId;
+                movieGet.Title = movie.Title;
+                movieGet.Description = movie.Description;
+                movieGet.Rating = movie.Rating;
+                movieGet.Imdb = movie.Imdb;
+                movieGet.Genres = movie.Genres;
+                movieGet.MovieRating = movie.MovieRating;
+                movieGet.Year = movie.Year;
+                movieGet.Duration = movie.Duration;
+                await client1.SetAsync(@"Movies/" + movie.MovieId, movieGet);
+                return new OkObjectResult(new { status = true, msg = "Movie Added" });
             }
-            else
+            catch (Exception e)
             {
-                Response response = new Response(400, "Movie already exists with given name!");
-                return new JsonResult(response);
-            }
-            }
-            else
-            {
-                Response res = new Response(400, "There was an error in the request!");
-                return new JsonResult(res);
+                return new OkObjectResult(new { status = false, msg = e.Message }) { StatusCode = 404 };
             }
         }
-
         [HttpDelete]
-        public JsonResult Delete([FromQuery] String title) {
-            IFirebaseConfig ifc = new FirebaseConfig()
+        public async Task<IActionResult> Delete(string id)
+        {
+            try
             {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
+                FileUploader fileupload = new FileUploader();
+                FirebaseResponse resp = client1.Get(@"Movies/" + id);
 
-
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse resp = client.Get(@"Movies/" + title);
-            MovieModel movie = resp.ResultAs<MovieModel>();
-            if (movie != null) {
-                resp = client.Delete(@"Movies/" + title);
-                int status = (int)resp.StatusCode;
-                if (status == 200) {
-                    Response res = new Response(200, "Movie deleted successfully!");
-                    return new JsonResult(res);
+                MovieGet movie = resp.ResultAs<MovieGet>();
+                if (movie != null)
+                {
+                    await fileupload.FileDelete(movie.TrailerUrl, ApiKey, AuthEmail, AuthPassword, Bucket);
+                    await fileupload.FileDelete(movie.ThumbnailUrl, ApiKey, AuthEmail, AuthPassword, Bucket);
+                    await fileupload.FileDelete(movie.PosterUrl, ApiKey, AuthEmail, AuthPassword, Bucket);
+                    resp = client1.Delete(@"Movies/" + id);
                 }
                 else
                 {
-                    Response res = new Response(400, "There was an error deleting the movie!");
-                    return new JsonResult(res);
+                    return new OkObjectResult(new { status = false, msg = "No Movie is Exist" });
                 }
-
+                return new OkObjectResult(new { status = true, msg = "Movie Deleted" });
             }
-            else
+            catch (Exception)
             {
-                Response res = new Response(400, "No such movie exists!");
-                return new JsonResult(res);
+                return new OkObjectResult(new { status = true, msg = "There was an error in deleting a Movie" }) { StatusCode = 404 };
             }
 
         }
 
-        [HttpPost]
-        public JsonResult Edit([FromBody] MovieModel movie) {
-            IFirebaseConfig ifc = new FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
-
-
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse resp = client.Get(@"Movies/" + movie.Title);
-            MovieModel movie_ = resp.ResultAs<MovieModel>();
-            if (movie_ != null) {
-                resp = client.Update<MovieModel>(@"Movies/" + movie.Title, movie);
-                int status = (int)resp.StatusCode;
-                if (status == 200)
-                {
-                    Response res = new Response(200, "Movie updated successfully!");
-                    return new JsonResult(res);
-                }
-                else
-                {
-                    Response res = new Response(400, "There was an error updating the movie!");
-                    return new JsonResult(res);
-                }
-            }
-            else
-            {
-                Response res = new Response(400, "No such movie exists!");
-                return new JsonResult(res);
-            }
-
-        }
-
-
-
-
-        [HttpGet]
-        public JsonResult Get() {
-
-            IFirebaseConfig ifc = new FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
-
-
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse response = client.Get("Movies");
-            Dictionary<string, MovieModel> data = response.ResultAs<Dictionary<string,  MovieModel>>();
-            return new JsonResult(data);
-        }
-
-        [HttpGet]
-        public JsonResult GetByName([FromQuery] String name)
+        [HttpPut]
+        [ActionName("edit")]
+        public async Task<IActionResult> Edit([FromForm] MovieModel movie, string id)
         {
-            IFirebaseConfig ifc = new FirebaseConfig()
+            try
             {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
+                FirebaseResponse resp = client1.Get(@"Movies/" + id);
+                MovieGet movieGet = new MovieGet();
+                MovieGet movie_ = resp.ResultAs<MovieGet>();
+                if (movie_ != null)
+                {
+                    FileUploader fileupload = new FileUploader();
 
+                    if (movie.TrailerFile.Length > 0)
+                    {
 
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse resp = client.Get(@"Movies/" + name);
-            MovieModel movie = resp.ResultAs<MovieModel>();
-            return new JsonResult(movie);
-        }
-
-        [HttpGet]
-        public JsonResult GetByGenre([FromQuery] String genre)  // single genre
-        {
-            IFirebaseConfig ifc = new FirebaseConfig()
-            {
-                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-            };
-
-
-            IFirebaseClient client = new FirebaseClient(ifc);
-            FirebaseResponse resp = client.Get("Movies");
-            Dictionary<string, MovieModel> data = resp.ResultAs<Dictionary<string, MovieModel>>();
-            List<MovieModel> movies = new List<MovieModel>();
-            foreach (KeyValuePair<string, MovieModel> entry in data)
-            {
-                MovieModel value = entry.Value;
-                String[] genres = value.Genres;
-                for (int i = 0; i < genres.Length; i++) {
-                    if (genres[i] == genre) {
-                        movies.Add(value);
+                        movieGet.TrailerUrl = await fileupload.FileUpload(movie.TrailerFile, ApiKey, AuthEmail, AuthPassword, Bucket);
                     }
 
-                }
+                    if (movie.PosterFile.Length > 0)
+                    {
+                        movieGet.PosterUrl = await fileupload.FileUpload(movie.PosterFile, ApiKey, AuthEmail, AuthPassword, Bucket);
+                    }
 
+                    if (movie.ThumbnailFile.Length > 0)
+                    {
+                        movieGet.ThumbnailUrl = await fileupload.FileUpload(movie.ThumbnailFile, ApiKey, AuthEmail, AuthPassword, Bucket);
+                    }
+
+                    movieGet.MovieId = id;
+                    movieGet.Title = movie.Title;
+                    movieGet.Description = movie.Description;
+                    movieGet.Rating = movie.Rating;
+                    movieGet.Imdb = movie.Imdb;
+                    movieGet.Genres = movie.Genres;
+                    movieGet.MovieRating = movie.MovieRating;
+                    movieGet.Year = movie.Year;
+                    movieGet.Duration = movie.Duration;
+
+
+                    resp = client1.Update<MovieGet>(@"Movies/" + id, movieGet);
+
+
+                    return new OkObjectResult(new { status = true, msg = "Movie updated Successfully" });
+                }
+                else
+                {
+
+                    return new OkObjectResult(new { status = false, msg = "No such movie exists!" });
+                }
+            }
+            catch (Exception)
+            {
+                return new OkObjectResult(new { status = false, msg = "There was an error updating the movie!" }) { StatusCode = 404 };
             }
 
-            return new JsonResult(movies);
+        }
+
+
+
+        [HttpGet]
+        public async Task<ActionResult> getallMovies()
+        {
+            try
+            {
+                var movies = await client.Child("Movies").OnceAsync<MovieGet>();
+
+
+                List<MovieGet> movieList = new List<MovieGet>();
+                foreach (var a in movies)
+                {
+                    movieList.Add(new MovieGet
+                    {
+
+                        MovieId = a.Object.MovieId,
+                        Title = a.Object.Title,
+                        Description = a.Object.Description,
+                        TrailerUrl = a.Object.TrailerUrl,
+                        PosterUrl = a.Object.PosterUrl,
+                        ThumbnailUrl = a.Object.ThumbnailUrl,
+                        Rating = a.Object.Rating,
+                        Imdb = a.Object.Imdb,
+                        MovieRating = a.Object.MovieRating,
+                        Duration = a.Object.Duration,
+                        Genres = a.Object.Genres,
+                        Year = a.Object.Year,
+                        createdOn = a.Object.createdOn
+                    });
+                }
+                List<MovieGet> SortedList = movieList.OrderByDescending(o => o.createdOn).ToList();
+
+                IDictionary<string, List<MovieGet>> dict_ = new Dictionary<string, List<MovieGet>>();
+                dict_["Movies"] = SortedList;
+                return new OkObjectResult(new { status = true, msg = "All Movie List", data = dict_ });
+
+            }
+            catch (Exception e)
+            {
+                return new OkObjectResult(new { status = false, msg = e.Message }) { StatusCode = 404 };
+            }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> getRandomMovie()
+        {
+            try
+            {
+                var movies = await client.Child("Movies").OnceAsync<MovieGet>();
+
+
+                List<MovieGet> movieList = new List<MovieGet>();
+                foreach (var a in movies)
+                {
+                    movieList.Add(new MovieGet
+                    {
+
+                        MovieId = a.Object.MovieId,
+                        Title = a.Object.Title,
+                        Description = a.Object.Description,
+                        TrailerUrl = a.Object.TrailerUrl,
+                        PosterUrl = a.Object.PosterUrl,
+                        ThumbnailUrl = a.Object.ThumbnailUrl,
+                        Rating = a.Object.Rating,
+                        Imdb = a.Object.Imdb,
+                        MovieRating = a.Object.MovieRating,
+                        Duration = a.Object.Duration,
+                        Genres = a.Object.Genres,
+                        Year = a.Object.Year,
+                        createdOn = a.Object.createdOn
+                    });
+                }
+                var random = new Random();
+                int index = random.Next(movieList.Count);
+
+
+                IDictionary<string, MovieGet> dict_ = new Dictionary<string, MovieGet>();
+                dict_["Movies"] = movieList[index];
+                return new OkObjectResult(new { status = true, msg = "Random Movie", data = dict_ });
+
+            }
+            catch (Exception e)
+            {
+                return new OkObjectResult(new { status = false, msg = e.Message }) { StatusCode = 404 };
+            }
+        }
+        [HttpGet]
+        public IActionResult getMovie(string id)
+        {
+            try
+            {
+
+                FirebaseResponse resp = client1.Get(@"Movies/" + id);
+                MovieGet movie = resp.ResultAs<MovieGet>();
+
+                IDictionary<string, object> dict_ = new Dictionary<string, object>();
+                dict_["Movie"] = movie;
+                return new OkObjectResult(new { status = true, msg = "Movie", data = dict_ });
+            }
+            catch (Exception e)
+            {
+                return new OkObjectResult(new { status = false, msg = e.Message }) { StatusCode = 404 };
+            }
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetByName([FromQuery] String name)
+        {
+
+            try
+            {
+                var movies = await client.Child("Movies").OnceAsync<MovieGet>();
+                List<MovieGet> movieList = new List<MovieGet>();
+                foreach (var a in movies)
+                {
+                    if (a.Object.Title.Equals(name))
+                    {
+                        movieList.Add(new MovieGet
+                        {
+
+                            MovieId = a.Object.MovieId,
+                            Title = a.Object.Title,
+                            Description = a.Object.Description,
+                            TrailerUrl = a.Object.TrailerUrl,
+                            PosterUrl = a.Object.PosterUrl,
+                            ThumbnailUrl = a.Object.ThumbnailUrl,
+                            Rating = a.Object.Rating,
+                            Imdb = a.Object.Imdb,
+                            MovieRating = a.Object.MovieRating,
+                            Duration = a.Object.Duration,
+                            Genres = a.Object.Genres,
+                            Year = a.Object.Year,
+                            createdOn = a.Object.createdOn
+                        });
+                    }
+                }
+
+                List<MovieGet> SortedList = movieList.OrderByDescending(o => o.createdOn).ToList();
+
+                IDictionary<string, List<MovieGet>> dict_ = new Dictionary<string, List<MovieGet>>();
+                dict_["Movies"] = SortedList;
+                return new OkObjectResult(new { status = true, msg = "Movie List", data = dict_ });
+            }
+            catch (Exception)
+            {
+                return new OkObjectResult(new { status = false, msg = "No Movie Found" }) { StatusCode = 404 };
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetByGenre([FromQuery] String genre)  // single genre
+        {
+            try
+            {
+                var movies = await client.Child("Movies").OnceAsync<MovieGet>();
+                List<MovieGet> movieList = new List<MovieGet>();
+                foreach (var a in movies)
+                {
+                    if (a.Object.Genres.Contains(genre))
+                    {
+                        movieList.Add(new MovieGet
+                        {
+
+                            MovieId = a.Object.MovieId,
+                            Title = a.Object.Title,
+                            Description = a.Object.Description,
+                            TrailerUrl = a.Object.TrailerUrl,
+                            PosterUrl = a.Object.PosterUrl,
+                            ThumbnailUrl = a.Object.ThumbnailUrl,
+                            Rating = a.Object.Rating,
+                            Imdb = a.Object.Imdb,
+                            MovieRating = a.Object.MovieRating,
+                            Duration = a.Object.Duration,
+                            Genres = a.Object.Genres,
+                            Year = a.Object.Year,
+                            createdOn = a.Object.createdOn
+                        });
+                    }
+                }
+
+                List<MovieGet> SortedList = movieList.OrderByDescending(o => o.createdOn).ToList();
+
+                IDictionary<string, List<MovieGet>> dict_ = new Dictionary<string, List<MovieGet>>();
+                dict_["Movies"] = SortedList;
+                return new OkObjectResult(new { status = true, msg = "Movie List", data = dict_ });
+            }
+            catch (Exception)
+            {
+
+                return new OkObjectResult(new { status = false, msg = "No Movie Found" }) { StatusCode = 404 };
+            }
         }
 
         [HttpPut]
         public JsonResult UpdateRating([FromQuery] String id, String rating) {
             try
             {
-                IFirebaseConfig ifc = new FirebaseConfig()
-                {
-                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
-                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
-                };
-
-
-                IFirebaseClient client = new FirebaseClient(ifc);
+               
                 float rating_ = float.Parse(rating);
-                FirebaseResponse resp = client.Get(@"Movies/" + id);
+                FirebaseResponse resp = client1.Get(@"Movies/" + id);
                 MovieModel movie = resp.ResultAs<MovieModel>();
                 movie.updateRating(rating_);
-                resp = client.Update<MovieModel>(@"Movies/" + id, movie);
+                resp = client1.Update<MovieModel>(@"Movies/" + id, movie);
                 Response res = new Response(200, "Rating successfully updated");
                 return new JsonResult(res);
             }
