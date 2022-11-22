@@ -44,16 +44,19 @@ namespace Netflix_backend.Controllers
                     }
                     else
                     {
-                        return new JsonResult("Invalid email or password!");
+                        Response res = new Response(401, "Invalid email or password");
+                        return Json(res);
                     }
                 }
             }
             catch (Exception ex)
             {
-                return new JsonResult("Invalid email or password!");
+                Response res_ = new Response(401, "Invalid email or password");
+                return Json(res_);
             }
-            return new JsonResult("Invalid email or password!");
-        }
+        Response res__ = new Response(401, "Invalid email or password");
+        return Json(res__);
+    }
 
         [HttpPost]
         public async Task<JsonResult> Register([FromBody] Admin admin) {
@@ -68,7 +71,7 @@ namespace Netflix_backend.Controllers
             }
             catch (Exception ex)
             {
-                Response res = new Response(400, "Admin already exists or some other error!");
+                Response res = new Response(400, "Invalid email or password!");
                 return Json(res);
             }
         }

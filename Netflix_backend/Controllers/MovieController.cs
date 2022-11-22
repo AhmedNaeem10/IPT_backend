@@ -204,7 +204,32 @@ namespace Netflix_backend.Controllers
             return new JsonResult(movies);
         }
 
+        [HttpPut]
+        public JsonResult UpdateRating([FromQuery] String id, String rating) {
+            try
+            {
+                IFirebaseConfig ifc = new FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
 
 
+                IFirebaseClient client = new FirebaseClient(ifc);
+                float rating_ = float.Parse(rating);
+                FirebaseResponse resp = client.Get(@"Movies/" + id);
+                MovieModel movie = resp.ResultAs<MovieModel>();
+                movie.updateRating(rating_);
+                resp = client.Update<MovieModel>(@"Movies/" + id, movie);
+                Response res = new Response(200, "Rating successfully updated");
+                return new JsonResult(res);
+            }
+            catch (Exception ex) {
+                Response res = new Response(400, ex.Message);
+                return new JsonResult(res);
+            }
+
+            
+        }
     }
 }

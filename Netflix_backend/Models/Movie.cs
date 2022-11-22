@@ -23,11 +23,17 @@ namespace Netflix_backend.Models
 
         public int Duration { get; set; }
 
-        public int Rating { get; set; }
+        public float Rating { get; set; }
 
         public MovieModel()
         {
             this.MovieId = Guid.NewGuid().ToString("N");
         }
+
+        public void updateRating(float new_rating) {
+            this.Rating += new_rating;
+            this.Rating /= 2;
+        }
+
     }
 }

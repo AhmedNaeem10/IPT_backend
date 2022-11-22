@@ -16,6 +16,7 @@ using Newtonsoft.Json.Linq;
 using FirebaseAdmin.Auth;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using FirebaseAuth = FirebaseAdmin.Auth.FirebaseAuth;
 
 namespace Netflix_backend.Controllers
 {
@@ -54,14 +55,17 @@ namespace Netflix_backend.Controllers
                 }
                 else
                 {
-                    Response res = new Response(status, "Failed to register the user!");
+                    Response res = new Response(status, "Failed to register user!");
                     return Json(res);
                 }
 
             }
             catch (Exception ex)
             {
-                Response res = new Response(400, "User already exists or some other error!");
+                String msg = ex.Message;
+                Console.WriteLine(msg);
+                String part = msg.Split("Reason: ")[1];
+                Response res = new Response(400, part);
                 return Json(res);
             }
         }
@@ -73,8 +77,6 @@ namespace Netflix_backend.Controllers
                 // Verification.
                 if (ModelState.IsValid)
                 {
-
-
                     var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
                     var ab = await auth.SignInWithEmailAndPasswordAsync(user.Email, user.Password);
                     await ab.RefreshUserDetails();
@@ -91,15 +93,18 @@ namespace Netflix_backend.Controllers
                     }
                     else
                     {
-                        return Json("Invalid username or password!");
+                        Response res = new Response(401, "Could not issue firebase token");
+                        return Json(res);
                     }
                 }
             }
             catch (Exception ex)
             {
-                return Json("Invalid username or password!");
+                Response res_ = new Response(401, "Invalid email or password");
+                return Json(res_);
             }
-            return Json("There was an error in the request!");
+            Response res__ = new Response(401, "Invalid email or password");
+            return Json(res__);
         }
 
         [HttpPut]
@@ -109,7 +114,7 @@ namespace Netflix_backend.Controllers
                 String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
                     ProjectId = "fir-fast-36fe8",
                 });
 
@@ -154,7 +159,7 @@ namespace Netflix_backend.Controllers
                 String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
                     ProjectId = "fir-fast-36fe8",
                 });
 
@@ -197,7 +202,7 @@ namespace Netflix_backend.Controllers
                 String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
                     ProjectId = "fir-fast-36fe8",
                 });
 
@@ -283,7 +288,7 @@ namespace Netflix_backend.Controllers
                 String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
                     ProjectId = "fir-fast-36fe8",
                 });
 
@@ -326,7 +331,7 @@ namespace Netflix_backend.Controllers
                 String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
                     ProjectId = "fir-fast-36fe8",
                 });
 
@@ -359,7 +364,7 @@ namespace Netflix_backend.Controllers
                 String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
                     ProjectId = "fir-fast-36fe8",
                 });
 
@@ -391,7 +396,7 @@ namespace Netflix_backend.Controllers
                 String token = Authorization.Split(" ")[1];
                 FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile("/Users/ahmednaeem/Downloads/fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
                     ProjectId = "fir-fast-36fe8",
                 });
 
@@ -401,14 +406,17 @@ namespace Netflix_backend.Controllers
                 {
                     var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
                     await auth.SendPasswordResetEmailAsync(email);
-                    return Json("Email has been sent!");
+                    Response res = new Response(200, "Password reset email has been sent!");
+                    return Json(res);
                 }
             }
             catch (Exception ex)
             {
-                return Json("There was an error in the request!");
+                Response res = new Response(400, "Password reset email could not be sent!");
+                return Json(res);
             }
-            return Json("There was an error in the request!");
+            Response res_ = new Response(400, "Password reset email could not be sent!");
+            return Json(res_);
         }
 
         [HttpPost]
@@ -424,14 +432,37 @@ namespace Netflix_backend.Controllers
                     await ab.RefreshUserDetails();
                     string token_ = ab.FirebaseToken;
                     await auth.SendEmailVerificationAsync(token_);
-                    return Json("Email has been sent!");
+                    Response res = new Response(200, "Verification email has been sent!");
+                    return Json(res);
                 }
             }
             catch (Exception ex)
             {
-                return Json("There was an error in the request!");
+                Response res = new Response(400, "Verification email could not be sent!");
+                return Json(res);
             }
-            return Json("There was an error in the request!");
+            Response res_ = new Response(400, "Verification email could not be sent!");
+            return Json(res_);
+        }
+
+        [HttpDelete]
+        public async Task<JsonResult> Remove([FromQuery] String uid, [FromHeader] String Authorization)
+        {
+            try {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
+                await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.DeleteUserAsync(uid);
+                Response res = new Response(200, "User successfully deleted!");
+                return Json(res);
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                Response res = new Response(400, "User does not exist!");
+                return Json(res);
+            }
         }
     }
 }
