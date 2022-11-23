@@ -6290,11 +6290,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\FAST\\Semester7\\IPT\\Clone1\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj",
+      "projectUniqueName": "D:\\FAST\\Semester7\\IPT\\Clone\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj",
       "projectName": "Netflix_backend",
-      "projectPath": "D:\\FAST\\Semester7\\IPT\\Clone1\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj",
+      "projectPath": "D:\\FAST\\Semester7\\IPT\\Clone\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj",
       "packagesPath": "C:\\Users\\Ahmad\\.nuget\\packages\\",
-      "outputPath": "D:\\FAST\\Semester7\\IPT\\Clone1\\IPT_backend\\Netflix_backend\\obj\\",
+      "outputPath": "D:\\FAST\\Semester7\\IPT\\Clone\\IPT_backend\\Netflix_backend\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Ahmad\\AppData\\Roaming\\NuGet\\NuGet.Config",
