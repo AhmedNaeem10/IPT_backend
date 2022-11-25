@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "D:\\FAST\\Semester7\\IPT\\Clone\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj": {}
+    "D:\\semester 7\\IPT\\Backend\\new-features\\Netflix_backend\\Netflix_backend.csproj": {}
   },
   "projects": {
-    "D:\\FAST\\Semester7\\IPT\\Clone\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj": {
+    "D:\\semester 7\\IPT\\Backend\\new-features\\Netflix_backend\\Netflix_backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\FAST\\Semester7\\IPT\\Clone\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj",
+        "projectUniqueName": "D:\\semester 7\\IPT\\Backend\\new-features\\Netflix_backend\\Netflix_backend.csproj",
         "projectName": "Netflix_backend",
-        "projectPath": "D:\\FAST\\Semester7\\IPT\\Clone\\IPT_backend\\Netflix_backend\\Netflix_backend.csproj",
-        "packagesPath": "C:\\Users\\Ahmad\\.nuget\\packages\\",
-        "outputPath": "D:\\FAST\\Semester7\\IPT\\Clone\\IPT_backend\\Netflix_backend\\obj\\",
+        "projectPath": "D:\\semester 7\\IPT\\Backend\\new-features\\Netflix_backend\\Netflix_backend.csproj",
+        "packagesPath": "C:\\Users\\abari\\.nuget\\packages\\",
+        "outputPath": "D:\\semester 7\\IPT\\Backend\\new-features\\Netflix_backend\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Ahmad\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\abari\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -95,7 +100,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -107,7 +113,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.414\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }

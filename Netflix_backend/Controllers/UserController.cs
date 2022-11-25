@@ -418,22 +418,78 @@ namespace Netflix_backend.Controllers
             Response res_ = new Response(400, "Password reset email could not be sent!");
             return Json(res_);
         }
-
-        [HttpPost]
-        public async Task<JsonResult> SendVerificationEmail([FromBody] UserLogin user, [FromHeader] String Authorization)
+        [HttpGet]
+        public async Task<JsonResult> checkVerification([FromQuery] String uid, [FromHeader] String Authorization)
         {
             try
             {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
                 String token = Authorization.Split(" ")[1];
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+                string Uid = decodedToken.Uid;
+
                 if (ModelState.IsValid)
                 {
                     var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
+                    IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                    {
+                        AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                        BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                    };
+                    IFirebaseClient client = new FirebaseClient(ifc);
+                    FirebaseResponse res = client.Get(@"Users/" + uid);
+                    UserModel user = res.ResultAs<UserModel>();
+                    var ab = await auth.SignInWithEmailAndPasswordAsync(user.Email, user.Password);
+                    await ab.RefreshUserDetails();
+                    string token_ = ab.FirebaseToken;
+                    bool isVerified = ab.User.IsEmailVerified;
+                    Response response = new Response(200, isVerified);
+                    return Json(response);
+                }
+            }
+            catch (Exception ex)
+            {
+                Response response_ = new Response(400, "There was an error in the request!");
+                return Json(response_);
+            }
+            Response response__ = new Response(400, "There was an error in the request!");
+            return Json(response__);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> SendVerificationEmail([FromQuery] String uid, [FromHeader] String Authorization)
+        {
+            try
+            {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
+                String token = Authorization.Split(" ")[1];
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+                string Uid = decodedToken.Uid;
+                if (ModelState.IsValid)
+                {
+                    var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
+                    IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                    {
+                        AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                        BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                    };
+                    IFirebaseClient client = new FirebaseClient(ifc);
+                    FirebaseResponse res = client.Get(@"Users/" + uid);
+                    UserModel user = res.ResultAs<UserModel>();
                     var ab = await auth.SignInWithEmailAndPasswordAsync(user.Email, user.Password);
                     await ab.RefreshUserDetails();
                     string token_ = ab.FirebaseToken;
                     await auth.SendEmailVerificationAsync(token_);
-                    Response res = new Response(200, "Verification email has been sent!");
-                    return Json(res);
+                    Response response = new Response(200, "Verification email has been sent!");
+                    return Json(response);
                 }
             }
             catch (Exception ex)
@@ -449,6 +505,14 @@ namespace Netflix_backend.Controllers
         public async Task<JsonResult> Remove([FromQuery] String uid, [FromHeader] String Authorization)
         {
             try {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                    ProjectId = "fir-fast-36fe8",
+                });
+                String token = Authorization.Split(" ")[1];
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+                string Uid = decodedToken.Uid;
                 FirebaseApp.Create(new AppOptions()
                 {
                     Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
