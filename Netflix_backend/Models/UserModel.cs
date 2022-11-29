@@ -13,6 +13,7 @@ namespace Netflix_backend.Models
 
         public String Password { get; set; }
 
+        public String Subscription { get; set; }
         
         public List<String> Favlist;
 
@@ -31,6 +32,7 @@ namespace Netflix_backend.Models
             this.Password = password;
             this.Favlist = new List<String>();
             this.MovieHistroy = new List<String>();
+            this.Subscription = "None";
         }
 
     }
