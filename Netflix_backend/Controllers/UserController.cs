@@ -641,5 +641,41 @@ namespace Netflix_backend.Controllers
                 return Json(res);
             }
         }
+
+        [HttpPut]
+        public async Task<JsonResult> Update([FromBody] UserModel user, [FromHeader] String Authorization)
+        {
+            try
+            {
+                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
+                {
+                    FirebaseApp.Create(new AppOptions()
+                    {
+                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                        ProjectId = "fir-fast-36fe8",
+                    });
+                }
+                String token = Authorization.Split(" ")[1];
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+                string Uid = decodedToken.Uid;
+
+                var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
+                IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
+                IFirebaseClient client = new FirebaseClient(ifc);
+                FirebaseResponse response = client.Update<UserModel>(@"Users/" + user.UserId, user);
+                Response res = new Response(200, "User successfully deleted!");
+                return Json(res);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Response res_ = new Response(400, "User does not exist!");
+                return Json(res_);
+            }
+        }
     }
 }

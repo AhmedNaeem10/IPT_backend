@@ -14,6 +14,10 @@ namespace Netflix_backend.Models
         public String Password { get; set; }
 
         public String Subscription { get; set; }
+
+        public String Restriction { get; set; }
+
+        public String Avatar { get; set; }
         
         public List<String> Favlist;
 
@@ -33,6 +37,8 @@ namespace Netflix_backend.Models
             this.Favlist = new List<String>();
             this.MovieHistroy = new List<String>();
             this.Subscription = "None";
+            this.Avatar = "";
+            this.Restriction = "PG-13";
         }
 
     }
