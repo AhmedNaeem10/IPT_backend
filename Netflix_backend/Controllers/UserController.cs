@@ -666,14 +666,20 @@ namespace Netflix_backend.Controllers
                     BasePath = "https://fir-fast-36fe8.firebaseio.com/"
                 };
                 IFirebaseClient client = new FirebaseClient(ifc);
-                FirebaseResponse response = client.Update<UserModel>(@"Users/" + user.UserId, user);
-                Response res = new Response(200, "User successfully deleted!");
-                return Json(res);
+                FirebaseResponse res = client.Get(@"Users/" + user.UserId);
+                UserModel user_ = res.ResultAs<UserModel>();
+                user_.Name = user.Name;
+                user_.Avatar = user.Avatar;
+                user_.Email = user.Email;
+                user_.Restriction = user.Restriction;
+                FirebaseResponse response = client.Update<UserModel>(@"Users/" + user.UserId, user_);
+                Response resp = new Response(200, "User successfully updated!");
+                return Json(resp);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                Response res_ = new Response(400, "User does not exist!");
+                Response res_ = new Response(400, "There was an error in the request!");
                 return Json(res_);
             }
         }

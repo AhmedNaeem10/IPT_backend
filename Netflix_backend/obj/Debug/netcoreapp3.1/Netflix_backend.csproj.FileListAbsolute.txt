@@ -138,4 +138,3 @@ D:/semester 7/IPT/Backend/new-features/Netflix_backend/obj/Debug/netcoreapp3.1/N
 /Users/ahmednaeem/Projects/Netflix_backend_new/Netflix_backend/obj/Debug/netcoreapp3.1/Netflix_backend.dll
 /Users/ahmednaeem/Projects/Netflix_backend_new/Netflix_backend/obj/Debug/netcoreapp3.1/Netflix_backend.pdb
 /Users/ahmednaeem/Projects/Netflix_backend_new/Netflix_backend/obj/Debug/netcoreapp3.1/Netflix_backend.genruntimeconfig.cache
-/Users/ahmednaeem/Projects/Netflix_backend_new/Netflix_backend/obj/Debug/netcoreapp3.1/Netflix_backend.csproj.AssemblyReference.cache
