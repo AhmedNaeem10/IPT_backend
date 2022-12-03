@@ -13,10 +13,14 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Netflix_backend.Data;
 using System.Linq;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.Extensions.Logging;
+using LiteDB;
 
 namespace Netflix_backend.Controllers
 {
 
+   
     public class MovieController
     {
         private readonly IConfiguration configuration;
@@ -27,9 +31,11 @@ namespace Netflix_backend.Controllers
         private readonly string Bucket;
         private readonly string AuthEmail;
         private readonly string AuthPassword;
-
-        public MovieController(IConfiguration config)
+        private readonly ILogger<HomeController> _logger;
+        public MovieController(IConfiguration config, ILogger<HomeController> logger)
         {
+                _logger = logger;
+            
             configuration = config;
 
             IFirebaseConfig conn = new FirebaseConfig
@@ -46,15 +52,74 @@ namespace Netflix_backend.Controllers
             AuthPassword = configuration.GetConnectionString("AuthPassword");
         }
 
+
+
+        [HttpGet]
+        public async Task<ActionResult> getMovies()
+        {
+            try
+            {
+                var movies = await client.Child("Movies").OnceAsync<MovieGet>();
+                var genres = await client.Child("Genres").OnceAsync<Genre>();
+
+
+                List<object> mL = new List<object>();
+                foreach (var b in genres)
+                {
+                    IDictionary<string, List<MovieGet>> dict_ = new Dictionary<string, List<MovieGet>>();
+                    List<MovieGet> movieList = new List<MovieGet>();
+
+                    foreach (var a in movies)
+                    {
+                        if (a.Object.Genres.Contains(b.Object.Name))
+                        {
+                            movieList.Add(new MovieGet
+                            {
+
+                                MovieId = a.Object.MovieId,
+                                Title = a.Object.Title,
+                                Description = a.Object.Description,
+                                TrailerUrl = a.Object.TrailerUrl,
+                                PosterUrl = a.Object.PosterUrl,
+                                ThumbnailUrl = a.Object.ThumbnailUrl,
+                                Rating = a.Object.Rating,
+                                Imdb = a.Object.Imdb,
+                                MovieRating = a.Object.MovieRating,
+                                Duration = a.Object.Duration,
+                                Genres = a.Object.Genres,
+                                Year = a.Object.Year,
+                                createdOn = a.Object.createdOn
+                            });
+                        }
+                    }
+                    dict_[b.Object.Name] = movieList;
+                    mL.Add(dict_);
+                }
+
+
+                // List<object> dict1 = new List<object>();
+                //dict1.Add(dict_);
+                return new OkObjectResult(new { status = true, msg = "All Movie List", data = mL });
+
+            }
+            catch (Exception e)
+            {
+                return new OkObjectResult(new { status = false, msg = e.Message }) { StatusCode = 404 };
+            }
+        }
+
         [HttpPost]
+        [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue, ValueLengthLimit = Int32.MaxValue), DisableRequestSizeLimit]
+
         public async Task<IActionResult> addMovie([FromForm] MovieModel movie)
         {
-
+            //_logger.LogInformation(movie.ThumbnailFile?.Length.ToString());
             MovieGet movieGet = new MovieGet();
             try
             {
+                //_logger.LogInformation(movie.ToString());
                 FileUploader fileupload = new FileUploader();
-                if (movie.TrailerFile.Length > 0)
+                if (movie.TrailerFile != null)
                 {
 
                     movieGet.TrailerUrl = await fileupload.FileUpload(movie.TrailerFile, ApiKey, AuthEmail, AuthPassword, Bucket);
@@ -63,7 +128,7 @@ namespace Netflix_backend.Controllers
                 {
                     return new OkObjectResult(new { status = false, msg = "Movie Video is required" });
                 }
-                if (movie.PosterFile.Length > 0)
+                if (movie.PosterFile != null)
                 {
                     movieGet.PosterUrl = await fileupload.FileUpload(movie.PosterFile, ApiKey, AuthEmail, AuthPassword, Bucket);
                 }
@@ -71,7 +136,7 @@ namespace Netflix_backend.Controllers
                 {
                     return new OkObjectResult(new { status = false, msg = "Movie Poster is required" });
                 }
-                if (movie.ThumbnailFile.Length > 0)
+                if (movie.ThumbnailFile != null)
                 {
                     movieGet.ThumbnailUrl = await fileupload.FileUpload(movie.ThumbnailFile, ApiKey, AuthEmail, AuthPassword, Bucket);
                 }
@@ -83,19 +148,19 @@ namespace Netflix_backend.Controllers
                 var allMovies = await client.Child("Movies").OnceAsync<MovieGet>();
                 foreach (var a in allMovies)
                 {
-                    if (a.Object.Title == movie.Title)
+                    if (a.Object.Title == movie.MovieTitle)
                     {
                         return new OkObjectResult(new { status = false, msg = "Movie already exists with given name!" });
                     }
                 }
 
                 movieGet.MovieId = movie.MovieId;
-                movieGet.Title = movie.Title;
+                movieGet.Title = movie.MovieTitle;
                 movieGet.Description = movie.Description;
                 movieGet.Rating = movie.Rating;
                 movieGet.Imdb = movie.Imdb;
-                movieGet.Genres = movie.Genres;
-                movieGet.MovieRating = movie.MovieRating;
+                movieGet.Genres = movie.Genre;
+                movieGet.MovieRating = movie.AgeRating;
                 movieGet.Year = movie.Year;
                 movieGet.Duration = movie.Duration;
                 await client1.SetAsync(@"Movies/" + movie.MovieId, movieGet);
@@ -165,12 +230,12 @@ namespace Netflix_backend.Controllers
                     }
 
                     movieGet.MovieId = id;
-                    movieGet.Title = movie.Title;
+                    movieGet.Title = movie.MovieTitle;
                     movieGet.Description = movie.Description;
                     movieGet.Rating = movie.Rating;
                     movieGet.Imdb = movie.Imdb;
-                    movieGet.Genres = movie.Genres;
-                    movieGet.MovieRating = movie.MovieRating;
+                    movieGet.Genres = movie.Genre;
+                    movieGet.MovieRating = movie.AgeRating;
                     movieGet.Year = movie.Year;
                     movieGet.Duration = movie.Duration;
 

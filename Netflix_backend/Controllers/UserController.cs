@@ -17,16 +17,21 @@ using FirebaseAdmin.Auth;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using FirebaseAuth = FirebaseAdmin.Auth.FirebaseAuth;
+using Microsoft.Extensions.Configuration;
+using FirebaseConfig = FireSharp.Config.FirebaseConfig;
+using Microsoft.Extensions.Logging;
 
 namespace Netflix_backend.Controllers
 {
+    
     public class User : Controller
     {
+        private readonly ILogger<User> _logger;
         private static string ApiKey = "AIzaSyCPcdnvkK1SeroRhlgDkdA_EHPw4qHCluw";
 
-        public User()
+        public User(ILogger<User> logger)
         {
-
+            _logger = logger;
         }
 
         [HttpPost]
@@ -46,6 +51,7 @@ namespace Netflix_backend.Controllers
                 IFirebaseClient client = new FirebaseClient(ifc);
                 
                 UserModel new_user = new UserModel(a.User.LocalId, user.Name, user.Email, user.Password);
+                new_user.UserId = a.User.LocalId;
                 SetResponse set = client.Set(@"Users/" + new_user.UserId, new_user);
                 int status = (int)set.StatusCode;
                 if (status == 200)
@@ -363,8 +369,14 @@ namespace Netflix_backend.Controllers
                 IFirebaseClient client = new FirebaseClient(ifc);
                 FirebaseResponse res = client.Get("Users");
                 Dictionary<string, UserModel> data = res.ResultAs<Dictionary<string, UserModel>>();
-                return JsonConvert.SerializeObject(data.Values);
-            }
+                if (data != null)
+                {
+                    return JsonConvert.SerializeObject(data.Values);
+                }
+                Response resp = new Response(200, "No User Exists");
+                return JsonConvert.SerializeObject(resp);
+             
+                }
             catch (Exception ex) {
                 Response response = new Response(400, "There was an error in the request!");
                 return JsonConvert.SerializeObject(response);
@@ -431,6 +443,7 @@ namespace Netflix_backend.Controllers
                     Response res = new Response(200, "Password reset email has been sent!");
                     return Json(res);
                 }
+               
             }
             catch (Exception ex)
             {
@@ -523,8 +536,8 @@ namespace Netflix_backend.Controllers
             return Json(response__);
         }
 
-        [HttpPut]
-        public async Task<JsonResult> AddSubscription([FromQuery] String uid, String subscription, [FromHeader] String Authorization)
+        [HttpGet]
+        public async Task<JsonResult> AddSubscription([FromHeader] String Authorization,[FromQuery] String uid, String subscription)
         {
             try
             {
@@ -536,6 +549,7 @@ namespace Netflix_backend.Controllers
                         ProjectId = "fir-fast-36fe8",
                     });
                 }
+                _logger.LogInformation(Authorization +" " +subscription + " " + uid);
                 String token = Authorization.Split(" ")[1];
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string Uid = decodedToken.Uid;
@@ -614,7 +628,15 @@ namespace Netflix_backend.Controllers
         [HttpDelete]
         public async Task<JsonResult> Remove([FromQuery] String uid, [FromHeader] String Authorization)
         {
+            IFirebaseClient client1;
+            IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+            {
+                AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+            };
+            client1 = new FireSharp.FirebaseClient(ifc);
             try {
+                
                 if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
                 {
                     FirebaseApp.Create(new AppOptions()
@@ -626,12 +648,8 @@ namespace Netflix_backend.Controllers
                 String token = Authorization.Split(" ")[1];
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string Uid = decodedToken.Uid;
-                FirebaseApp.Create(new AppOptions()
-                {
-                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                    ProjectId = "fir-fast-36fe8",
-                });
                 await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.DeleteUserAsync(uid);
+                client1.Delete(@"Users/" + uid);
                 Response res = new Response(200, "User successfully deleted!");
                 return Json(res);
             }

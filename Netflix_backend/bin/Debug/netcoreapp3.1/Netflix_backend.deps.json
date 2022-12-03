@@ -722,6 +722,9 @@
       "Microsoft.NETCore.Targets/1.1.0": {},
       "Microsoft.NETCore.Windows.ApiSets/1.0.1": {},
       "Microsoft.Owin/4.2.2": {
+        "dependencies": {
+          "Owin": "1.0.0"
+        },
         "runtime": {
           "lib/net45/Microsoft.Owin.dll": {
             "assemblyVersion": "4.2.2.0",
@@ -733,6 +736,10 @@
         }
       },
       "Microsoft.Owin.Host.SystemWeb/4.2.2": {
+        "dependencies": {
+          "Microsoft.Owin": "4.2.2",
+          "Owin": "1.0.0"
+        },
         "runtime": {
           "lib/net45/Microsoft.Owin.Host.SystemWeb.dll": {
             "assemblyVersion": "4.2.2.0",
@@ -744,6 +751,10 @@
         }
       },
       "Microsoft.Owin.Security/4.2.2": {
+        "dependencies": {
+          "Microsoft.Owin": "4.2.2",
+          "Owin": "1.0.0"
+        },
         "runtime": {
           "lib/net45/Microsoft.Owin.Security.dll": {
             "assemblyVersion": "4.2.2.0",
@@ -755,6 +766,11 @@
         }
       },
       "Microsoft.Owin.Security.Cookies/4.2.2": {
+        "dependencies": {
+          "Microsoft.Owin": "4.2.2",
+          "Microsoft.Owin.Security": "4.2.2",
+          "Owin": "1.0.0"
+        },
         "runtime": {
           "lib/net45/Microsoft.Owin.Security.Cookies.dll": {
             "assemblyVersion": "4.2.2.0",
