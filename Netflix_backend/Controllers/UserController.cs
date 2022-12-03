@@ -113,8 +113,8 @@ namespace Netflix_backend.Controllers
             return Json(res__);
         }
 
-        [HttpPut]
-        public async Task<JsonResult> AddToFavorites([FromQuery] String uid, String movie, [FromHeader] String Authorization)
+        [HttpGet]
+        public async Task<JsonResult> AddToFavorites([FromQuery] String uid,String movie, [FromHeader] String Authorization)
         {
             try {
                 String token = Authorization.Split(" ")[1];
@@ -160,7 +160,7 @@ namespace Netflix_backend.Controllers
 
         }
 
-        [HttpPut]
+        [HttpGet]
         public async Task<JsonResult> RemoveFromFavorites([FromQuery] String uid, String movie, [FromHeader] String Authorization)
         {
             try
@@ -454,6 +454,53 @@ namespace Netflix_backend.Controllers
             return Json(res_);
         }
         [HttpGet]
+        public async Task<IActionResult> checkisExist([FromQuery] String uid, String movie, [FromHeader] String Authorization)
+        {
+            try
+            {
+   
+                String token = Authorization.Split(" ")[1];
+                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
+                {
+                    FirebaseApp.Create(new AppOptions()
+                    {
+                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
+                        ProjectId = "fir-fast-36fe8",
+                    });
+                }
+
+                FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+
+                IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
+
+
+                IFirebaseClient client = new FirebaseClient(ifc);
+                FirebaseResponse res = client.Get(@"Users/" + uid);
+                UserModel user_ = res.ResultAs<UserModel>();
+                if (user_ != null)
+                {
+                    if (user_.Favlist.Contains(movie))
+                    {
+                        return new OkObjectResult(new { status = true, msg = "Movie Exist" });
+                    }
+                    return new OkObjectResult(new { status = false, msg = "Movie not Exist" });
+                }
+                else
+                {
+                    return new OkObjectResult(new { status = false, msg = "User not Exist" }) { StatusCode = 404 };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new OkObjectResult(new { status = false, msg = ex.Message }) { StatusCode = 404 };
+            }
+        }
+
+        [HttpGet]
         public async Task<JsonResult> checkVerification([FromQuery] String uid, [FromHeader] String Authorization)
         {
             try
@@ -549,7 +596,7 @@ namespace Netflix_backend.Controllers
                         ProjectId = "fir-fast-36fe8",
                     });
                 }
-                _logger.LogInformation(Authorization +" " +subscription + " " + uid);
+                //_logger.LogInformation(Authorization +" " +subscription + " " + uid);
                 String token = Authorization.Split(" ")[1];
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string Uid = decodedToken.Uid;

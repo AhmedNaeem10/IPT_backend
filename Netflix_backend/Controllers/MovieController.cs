@@ -109,6 +109,50 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResult> getFavMovies([FromBody] Class fav)
+        {
+            _logger.LogInformation("HELLOOooooooooooooooooooooooooooooooooooo");
+            try
+            {
+                var movies = await client.Child("Movies").OnceAsync<MovieGet>();
+                List<MovieGet> movieList = new List<MovieGet>();
+                foreach (var a in movies)
+                {
+                    if (fav.favListIds.Contains(a.Object.MovieId))
+                    {
+                        movieList.Add(new MovieGet
+                        {
+
+                            MovieId = a.Object.MovieId,
+                            Title = a.Object.Title,
+                            Description = a.Object.Description,
+                            TrailerUrl = a.Object.TrailerUrl,
+                            PosterUrl = a.Object.PosterUrl,
+                            ThumbnailUrl = a.Object.ThumbnailUrl,
+                            Rating = a.Object.Rating,
+                            Imdb = a.Object.Imdb,
+                            MovieRating = a.Object.MovieRating,
+                            Duration = a.Object.Duration,
+                            Genres = a.Object.Genres,
+                            Year = a.Object.Year,
+                            createdOn = a.Object.createdOn
+                        });
+                    }
+                }
+                List<MovieGet> SortedList = movieList.OrderByDescending(o => o.createdOn).ToList();
+
+                IDictionary<string, List<MovieGet>> dict_ = new Dictionary<string, List<MovieGet>>();
+                dict_["Movies"] = SortedList;
+                return new OkObjectResult(new { status = true, msg = "All Movie List", data = dict_ });
+
+            }
+            catch (Exception e)
+            {
+                return new OkObjectResult(new { status = false, msg = e.Message }) { StatusCode = 404 };
+            }
+        }
+
+        [HttpPost]
         [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue, ValueLengthLimit = Int32.MaxValue), DisableRequestSizeLimit]
 
         public async Task<IActionResult> addMovie([FromForm] MovieModel movie)
