@@ -24,9 +24,9 @@ namespace Netflix_backend.Controllers
     {
         private static string ApiKey = "AIzaSyCPcdnvkK1SeroRhlgDkdA_EHPw4qHCluw";
 
+
         public User()
         {
-
         }
 
         [HttpPost]
@@ -112,15 +112,6 @@ namespace Netflix_backend.Controllers
         {
             try {
                 String token = Authorization.Split(" ")[1];
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
-
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
               
                 IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
@@ -160,15 +151,6 @@ namespace Netflix_backend.Controllers
             try
             {
                 String token = Authorization.Split(" ")[1];
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
-
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
 
                 IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
@@ -206,15 +188,6 @@ namespace Netflix_backend.Controllers
             try
             {
                 String token = Authorization.Split(" ")[1];
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
-
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
 
                 IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
@@ -251,14 +224,6 @@ namespace Netflix_backend.Controllers
         {
             try {
                 String token = Authorization.Split(" ")[1];
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
 
                 IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
@@ -293,19 +258,10 @@ namespace Netflix_backend.Controllers
         }
 
         [HttpPut]
-        public async Task<JsonResult> ClearHistory([FromQuery] String email, String movie, [FromHeader] String Authorization)
+        public async Task<JsonResult> ClearHistory([FromQuery] String email, [FromHeader] String Authorization)
         {
             try {
                 String token = Authorization.Split(" ")[1];
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
-
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string uid = decodedToken.Uid;
 
@@ -343,14 +299,6 @@ namespace Netflix_backend.Controllers
         public async Task<String> GetAll([FromHeader] String Authorization) { 
             try {
                 String token = Authorization.Split(" ")[1];
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string uid = decodedToken.Uid;
                 IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
@@ -378,15 +326,6 @@ namespace Netflix_backend.Controllers
         {
             try {
                 String token = Authorization.Split(" ")[1];
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
-
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string uid = decodedToken.Uid;
 
@@ -413,15 +352,6 @@ namespace Netflix_backend.Controllers
             try
             {
                 String token = Authorization.Split(" ")[1];
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
-
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string uid = decodedToken.Uid;
                 if (ModelState.IsValid)
@@ -445,14 +375,6 @@ namespace Netflix_backend.Controllers
         {
             try
             {
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
                 String token = Authorization.Split(" ")[1];
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string Uid = decodedToken.Uid;
@@ -489,13 +411,6 @@ namespace Netflix_backend.Controllers
         public async Task<JsonResult> getSubscription([FromQuery] String uid, [FromHeader] String Authorization) {
             try
             {
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null) {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
                 String token = Authorization.Split(" ")[1];
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string Uid = decodedToken.Uid;
@@ -528,14 +443,6 @@ namespace Netflix_backend.Controllers
         {
             try
             {
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
                 String token = Authorization.Split(" ")[1];
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string Uid = decodedToken.Uid;
@@ -572,14 +479,6 @@ namespace Netflix_backend.Controllers
         {
             try
             {
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
                 String token = Authorization.Split(" ")[1];
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string Uid = decodedToken.Uid;
@@ -615,29 +514,17 @@ namespace Netflix_backend.Controllers
         public async Task<JsonResult> Remove([FromQuery] String uid, [FromHeader] String Authorization)
         {
             try {
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
                 String token = Authorization.Split(" ")[1];
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string Uid = decodedToken.Uid;
-                FirebaseApp.Create(new AppOptions()
-                {
-                    Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                    ProjectId = "fir-fast-36fe8",
-                });
+                
                 await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.DeleteUserAsync(uid);
                 Response res = new Response(200, "User successfully deleted!");
                 return Json(res);
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.Message);
-                Response res = new Response(400, "User does not exist!");
+                Response res = new Response(400, "There was an error in the request!");
                 return Json(res);
             }
         }
@@ -647,14 +534,6 @@ namespace Netflix_backend.Controllers
         {
             try
             {
-                if (FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance == null)
-                {
-                    FirebaseApp.Create(new AppOptions()
-                    {
-                        Credential = GoogleCredential.FromFile("fir-fast-36fe8-firebase-adminsdk-kktkq-a8801e9003.json"),
-                        ProjectId = "fir-fast-36fe8",
-                    });
-                }
                 String token = Authorization.Split(" ")[1];
                 FirebaseToken decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
                 string Uid = decodedToken.Uid;
