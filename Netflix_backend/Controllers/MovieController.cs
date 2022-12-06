@@ -15,6 +15,8 @@ using Netflix_backend.Data;
 using System.Linq;
 using System.Security.Claims;
 using static Google.Apis.Requests.BatchRequest;
+using Firebase.Auth;
+using FirebaseConfig = FireSharp.Config.FirebaseConfig;
 
 namespace Netflix_backend.Controllers
 {
@@ -514,7 +516,7 @@ namespace Netflix_backend.Controllers
 
         }
         [HttpGet]
-        public async Task<JsonResult> Recommendation([FromQuery] String id)
+        public async Task<JsonResult> Recommendation([FromQuery] String id, String uid)
         {
             try
             {
@@ -543,8 +545,19 @@ namespace Netflix_backend.Controllers
 
 
                 List<MovieGet> recommended_movies = recommendation_system.getRecommendation(id, movieList);
-                return new JsonResult(recommended_movies);
-
+                var auth = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(ApiKey));
+                IFirebaseConfig ifc = new FireSharp.Config.FirebaseConfig()
+                {
+                    AuthSecret = "VIB4QyeoIjd43kf2yFcU7l9ynqtKSJPF3fplsdUp",
+                    BasePath = "https://fir-fast-36fe8.firebaseio.com/"
+                };
+                IFirebaseClient client1 = new FirebaseClient(ifc);
+                FirebaseResponse res = client1.Get(@"Users/" + uid);
+                UserModel user = res.ResultAs<UserModel>();
+                user.Recommendation = recommended_movies;
+                client1.Update<UserModel>(@"Users/" + uid, user);
+                Response response = new Response(200, "Recommendation successfully added!");
+                return new JsonResult(response);
             }
             catch (Exception ex)
             {

@@ -23,10 +23,13 @@ namespace Netflix_backend.Models
 
         public List<String> MovieHistroy;
 
+        public List<MovieGet> Recommendation;
+
         public UserModel()
         {
             this.Favlist = new List<String>();
             this.MovieHistroy = new List<String>();
+            this.Recommendation = new List<MovieGet>();
         }
 
         public UserModel(String id, String name, String email, String password) {
@@ -36,6 +39,7 @@ namespace Netflix_backend.Models
             this.Password = password;
             this.Favlist = new List<String>();
             this.MovieHistroy = new List<String>();
+            this.Recommendation = new List<MovieGet>();
             this.Subscription = "None";
             this.Avatar = "";
             this.Restriction = "PG-13";
