@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Netflix_backend.Data;
 using System.Linq;
+using System.Security.Claims;
+using static Google.Apis.Requests.BatchRequest;
 
 namespace Netflix_backend.Controllers
 {
@@ -27,6 +29,8 @@ namespace Netflix_backend.Controllers
         private readonly string Bucket;
         private readonly string AuthEmail;
         private readonly string AuthPassword;
+        public movie_rec recommendation_system;
+
 
         public MovieController(IConfiguration config)
         {
@@ -44,8 +48,52 @@ namespace Netflix_backend.Controllers
             Bucket = configuration.GetConnectionString("Bucket");
             AuthEmail = configuration.GetConnectionString("AuthEmail");
             AuthPassword = configuration.GetConnectionString("AuthPassword");
+            recommendation_system = new movie_rec();
         }
 
+
+        [HttpPost]
+        public async Task<ActionResult> getFavMovies([FromBody] Class fav)
+        {
+            try
+            {
+                var movies = await client.Child("Movies").OnceAsync<MovieGet>();
+                List<MovieGet> movieList = new List<MovieGet>();
+                foreach (var a in movies)
+                {
+                    if (fav.favListIds.Contains(a.Object.MovieId))
+                    {
+                        movieList.Add(new MovieGet
+                        {
+
+                            MovieId = a.Object.MovieId,
+                            Title = a.Object.Title,
+                            Description = a.Object.Description,
+                            TrailerUrl = a.Object.TrailerUrl,
+                            PosterUrl = a.Object.PosterUrl,
+                            ThumbnailUrl = a.Object.ThumbnailUrl,
+                            Rating = a.Object.Rating,
+                            Imdb = a.Object.Imdb,
+                            MovieRating = a.Object.MovieRating,
+                            Duration = a.Object.Duration,
+                            Genres = a.Object.Genres,
+                            Year = a.Object.Year,
+                            createdOn = a.Object.createdOn
+                        });
+                    }
+                }
+                List<MovieGet> SortedList = movieList.OrderByDescending(o => o.createdOn).ToList();
+
+                IDictionary<string, List<MovieGet>> dict_ = new Dictionary<string, List<MovieGet>>();
+                dict_["Movies"] = SortedList;
+                return new OkObjectResult(new { status = true, msg = "All Movie List", data = dict_ });
+
+            }
+            catch (Exception e)
+            {
+                return new OkObjectResult(new { status = false, msg = e.Message }) { StatusCode = 404 };
+            }
+        }
         [HttpPost]
         public async Task<IActionResult> addMovie([FromForm] MovieModel movie)
         {
@@ -280,6 +328,61 @@ namespace Netflix_backend.Controllers
                 return new OkObjectResult(new { status = false, msg = e.Message }) { StatusCode = 404 };
             }
         }
+
+        [HttpGet]
+        public async Task<ActionResult> getMovies()
+        {
+            try
+            {
+                var movies = await client.Child("Movies").OnceAsync<MovieGet>();
+                var genres = await client.Child("Genres").OnceAsync<Genre>();
+
+
+                List<object> mL = new List<object>();
+                foreach (var b in genres)
+                {
+                    IDictionary<string, List<MovieGet>> dict_ = new Dictionary<string, List<MovieGet>>();
+                    List<MovieGet> movieList = new List<MovieGet>();
+
+                    foreach (var a in movies)
+                    {
+                        if (a.Object.Genres.Contains(b.Object.Name))
+                        {
+                            movieList.Add(new MovieGet
+                            {
+
+                                MovieId = a.Object.MovieId,
+                                Title = a.Object.Title,
+                                Description = a.Object.Description,
+                                TrailerUrl = a.Object.TrailerUrl,
+                                PosterUrl = a.Object.PosterUrl,
+                                ThumbnailUrl = a.Object.ThumbnailUrl,
+                                Rating = a.Object.Rating,
+                                Imdb = a.Object.Imdb,
+                                MovieRating = a.Object.MovieRating,
+                                Duration = a.Object.Duration,
+                                Genres = a.Object.Genres,
+                                Year = a.Object.Year,
+                                createdOn = a.Object.createdOn
+                            });
+                        }
+                    }
+                    dict_[b.Object.Name] = movieList;
+                    mL.Add(dict_);
+                }
+
+
+                // List<object> dict1 = new List<object>();
+                //dict1.Add(dict_);
+                return new OkObjectResult(new { status = true, msg = "All Movie List", data = mL });
+
+            }
+            catch (Exception e)
+            {
+                return new OkObjectResult(new { status = false, msg = e.Message }) { StatusCode = 404 };
+            }
+        }
+
         [HttpGet]
         public IActionResult getMovie(string id)
         {
@@ -388,11 +491,12 @@ namespace Netflix_backend.Controllers
             }
         }
 
-        [HttpPut]
-        public JsonResult UpdateRating([FromQuery] String id, String rating) {
+        [HttpGet]
+        public JsonResult UpdateRating([FromQuery] String id, String rating)
+        {
             try
             {
-               
+
                 float rating_ = float.Parse(rating);
                 FirebaseResponse resp = client1.Get(@"Movies/" + id);
                 MovieModel movie = resp.ResultAs<MovieModel>();
@@ -401,12 +505,53 @@ namespace Netflix_backend.Controllers
                 Response res = new Response(200, "Rating successfully updated");
                 return new JsonResult(res);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Response res = new Response(400, ex.Message);
                 return new JsonResult(res);
             }
 
-            
+
+        }
+        [HttpGet]
+        public async Task<JsonResult> Recommendation([FromQuery] String id)
+        {
+            try
+            {
+                var movies = await client.Child("Movies").OnceAsync<MovieGet>();
+                List<MovieGet> movieList = new List<MovieGet>();
+                foreach (var a in movies)
+                {
+                    movieList.Add(new MovieGet
+                    {
+
+                        MovieId = a.Object.MovieId,
+                        Title = a.Object.Title,
+                        Description = a.Object.Description,
+                        TrailerUrl = a.Object.TrailerUrl,
+                        PosterUrl = a.Object.PosterUrl,
+                        ThumbnailUrl = a.Object.ThumbnailUrl,
+                        Rating = a.Object.Rating,
+                        Imdb = a.Object.Imdb,
+                        MovieRating = a.Object.MovieRating,
+                        Duration = a.Object.Duration,
+                        Genres = a.Object.Genres,
+                        Year = a.Object.Year,
+                        createdOn = a.Object.createdOn
+                    });
+                }
+
+
+                List<MovieGet> recommended_movies = recommendation_system.getRecommendation(id, movieList);
+                return new JsonResult(recommended_movies);
+
+            }
+            catch (Exception ex)
+            {
+                Response response = new Response(400, "There was an error in the request!");
+                return new JsonResult(response);
+            }
+
         }
     }
 }
